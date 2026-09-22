@@ -7,6 +7,7 @@ import {
 
 import appDefaults from "./app-defaults.json" with { type: "json" };
 import { appIdentity } from "./app-identity";
+import { matchBackgroundAction } from "./isomock/match-background";
 import { isomockDefaults, isomockTargets } from "./isomock/settings";
 
 const always = { mode: "always" } as const;
@@ -178,6 +179,13 @@ export const appSchema = defineToolcraft({
                 performanceRole: "responsiveness",
                 target: isomockTargets.background,
                 type: "color",
+              },
+              matchBackground: {
+                actions: [{ label: "Match screenshot", value: matchBackgroundAction }],
+                applicability: always,
+                label: "Background color",
+                target: "actions.matchBackground",
+                type: "actions",
               },
             },
             id: "background",
