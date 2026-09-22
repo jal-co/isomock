@@ -9,6 +9,12 @@
   z-index: 20;
 }
 
+.row {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
 .pill {
   backdrop-filter: blur(8px);
   background: color-mix(in oklab, var(--background) 80%, transparent);
@@ -28,5 +34,15 @@
 }
 
 .credit:hover {
+  color: var(--foreground);
+}
+
+.link {
+  color: color-mix(in oklab, var(--foreground) 80%, transparent);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.link:hover {
   color: var(--foreground);
 }
