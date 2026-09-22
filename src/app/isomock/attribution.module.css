@@ -1,0 +1,32 @@
+.attribution {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  left: 16px;
+  position: fixed;
+  top: 16px;
+  z-index: 20;
+}
+
+.pill {
+  backdrop-filter: blur(8px);
+  background: color-mix(in oklab, var(--background) 80%, transparent);
+  border: 1px solid color-mix(in oklab, var(--border) 12%, transparent);
+  border-radius: 999px;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+}
+
+.credit {
+  color: color-mix(in oklab, var(--foreground) 50%, transparent);
+  font-size: 11px;
+  padding-left: 4px;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.credit:hover {
+  color: var(--foreground);
+}

@@ -10,6 +10,7 @@ import {
   useToolcraftValue,
 } from "@/toolcraft/runtime/react";
 
+import { IsomockAttribution } from "./attribution";
 import { createIsomockCamera, isomockRayHitsImage } from "./camera";
 import {
   createIsomockGlRenderer,
@@ -38,7 +39,9 @@ export function IsomockCanvas(): React.JSX.Element {
   const mediaAssets = useToolcraftSelector((state) => state.mediaAssets);
   const source = findIsomockSource(mediaAssets);
   const sourceAssets = React.useMemo(() => (source ? [source] : []), [source]);
-  const presentationUrl = useToolcraftMediaPresentationUrls(sourceAssets).get(source?.id ?? "");
+  const presentationUrl = useToolcraftMediaPresentationUrls(sourceAssets).get(
+    source?.id ?? "",
+  );
   const settings = React.useMemo(() => readIsomockSettings(values), [values]);
 
   const decoded = useToolcraftPipelinePass(
@@ -55,19 +58,31 @@ export function IsomockCanvas(): React.JSX.Element {
   const bitmap = decoded.status === "success" ? decoded.result : null;
 
   const rect = sceneFrame.kind === "ready" ? sceneFrame.rect : null;
-  const devicePixelRatio = typeof window === "undefined" ? 1 : window.devicePixelRatio;
-  const backingWidth = rect ? Math.ceil(rect.width * devicePixelRatio * renderScale) : 0;
-  const backingHeight = rect ? Math.ceil(rect.height * devicePixelRatio * renderScale) : 0;
-  const imageAspect = bitmap ? getIsomockDisplayAspect(bitmap, source?.transform) : 1;
+  const devicePixelRatio =
+    typeof window === "undefined" ? 1 : window.devicePixelRatio;
+  const backingWidth = rect
+    ? Math.ceil(rect.width * devicePixelRatio * renderScale)
+    : 0;
+  const backingHeight = rect
+    ? Math.ceil(rect.height * devicePixelRatio * renderScale)
+    : 0;
+  const imageAspect = bitmap
+    ? getIsomockDisplayAspect(bitmap, source?.transform)
+    : 1;
   const camera = React.useMemo(
-    () => (rect ? createIsomockCamera(settings, imageAspect, rect.width / rect.height) : null),
+    () =>
+      rect
+        ? createIsomockCamera(settings, imageAspect, rect.width / rect.height)
+        : null,
     [imageAspect, rect, settings],
   );
 
   React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return undefined;
-    rendererRef.current = createIsomockGlRenderer(canvas, { disposable: false });
+    rendererRef.current = createIsomockGlRenderer(canvas, {
+      disposable: false,
+    });
     return () => {
       rendererRef.current?.dispose();
       rendererRef.current = null;
@@ -76,7 +91,8 @@ export function IsomockCanvas(): React.JSX.Element {
 
   React.useEffect(() => {
     const renderer = rendererRef.current;
-    if (!renderer || !camera || backingWidth === 0 || backingHeight === 0) return undefined;
+    if (!renderer || !camera || backingWidth === 0 || backingHeight === 0)
+      return undefined;
     let cancelled = false;
     const frame = requestAnimationFrame(() => {
       const draw = () => {
@@ -94,7 +110,9 @@ export function IsomockCanvas(): React.JSX.Element {
           renderer.clear(backingWidth, backingHeight);
         }
       };
-      const work = pipeline ? pipeline.runPass(previewRenderPass, undefined, draw) : Promise.resolve(draw());
+      const work = pipeline
+        ? pipeline.runPass(previewRenderPass, undefined, draw)
+        : Promise.resolve(draw());
       void work.then(() => {
         if (!cancelled) setRenderCount((count) => count + 1);
       });
@@ -103,11 +121,22 @@ export function IsomockCanvas(): React.JSX.Element {
       cancelled = true;
       cancelAnimationFrame(frame);
     };
-  }, [backingHeight, backingWidth, bitmap, camera, pipeline, settings, source?.transform]);
+  }, [
+    backingHeight,
+    backingWidth,
+    bitmap,
+    camera,
+    pipeline,
+    settings,
+    source?.transform,
+  ]);
 
   useIsomockFramingGestures(
     canvasRef,
-    React.useMemo(() => ({ offset: settings.offset, zoom: settings.zoom }), [settings.offset, settings.zoom]),
+    React.useMemo(
+      () => ({ offset: settings.offset, zoom: settings.zoom }),
+      [settings.offset, settings.zoom],
+    ),
     bitmap ? imageAspect : null,
   );
 
@@ -129,13 +158,16 @@ export function IsomockCanvas(): React.JSX.Element {
   });
 
   return (
-    <canvas
-      {...orbit}
-      className={styles.canvas}
-      data-isomock-render-count={renderCount}
-      data-isomock-source={bitmap ? "ready" : "empty"}
-      data-toolcraft-product-output=""
-      ref={canvasRef}
-    />
+    <>
+      <IsomockAttribution />
+      <canvas
+        {...orbit}
+        className={styles.canvas}
+        data-isomock-render-count={renderCount}
+        data-isomock-source={bitmap ? "ready" : "empty"}
+        data-toolcraft-product-output=""
+        ref={canvasRef}
+      />
+    </>
   );
 }
