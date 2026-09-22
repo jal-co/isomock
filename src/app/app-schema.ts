@@ -1,27 +1,200 @@
-import { defineToolcraft, mediaSourceModule } from "@/toolcraft/runtime";
+import {
+  defineToolcraft,
+  imageExportModule,
+  mediaSourceModule,
+  spatialViewModule,
+} from "@/toolcraft/runtime";
 
 import appDefaults from "./app-defaults.json" with { type: "json" };
 import { appIdentity } from "./app-identity";
+import { isomockDefaults, isomockTargets } from "./isomock/settings";
+
+const always = { mode: "always" } as const;
+const liveReason = "Re-renders the tilted screenshot on the GPU at the current backing size.";
 
 export const appSchema = defineToolcraft({
   defaults: appDefaults,
   base: {
     canvas: {
       enabled: true,
+      renderScale: true,
+      sizing: { mode: "editable-output" },
       upload: true,
     },
     identity: appIdentity,
     panels: {
       controls: {
-        sections: [],
-        title: "Controls",
+        sections: [
+          {
+            controls: {
+              screenshot: {
+                accept: "image/*",
+                applicability: always,
+                assetKind: "image",
+                defaultValue: null,
+                label: false,
+                performanceReason: "Replacing the screenshot decodes a new source texture once.",
+                performanceRole: "responsiveness",
+                target: isomockTargets.source,
+                type: "fileDrop",
+              },
+            },
+            id: "screenshot",
+            title: "Screenshot",
+          },
+          {
+            controls: {
+              pose: {
+                applicability: always,
+                defaultValue: isomockDefaults.pose,
+                keyframeable: false,
+                label: false,
+                performanceReason: liveReason,
+                performanceRole: "responsiveness",
+                target: isomockTargets.pose,
+                type: "orientationGizmo",
+              },
+              fieldOfView: {
+                applicability: always,
+                defaultValue: isomockDefaults.fieldOfView,
+                description: "Low values flatten perspective toward an isometric look; high values exaggerate depth.",
+                label: "Field of view",
+                max: 90,
+                min: 5,
+                performanceReason: liveReason,
+                performanceRole: "responsiveness",
+                sliderValueKind: "continuous",
+                step: 1,
+                target: isomockTargets.fieldOfView,
+                type: "slider",
+                unit: "°",
+              },
+              zoom: {
+                applicability: always,
+                defaultValue: isomockDefaults.zoom,
+                label: "Zoom",
+                max: 6,
+                min: 0.5,
+                performanceReason: liveReason,
+                performanceRole: "responsiveness",
+                sliderValueKind: "continuous",
+                step: 0.05,
+                target: isomockTargets.zoom,
+                type: "slider",
+              },
+              offset: {
+                applicability: always,
+                defaultValue: isomockDefaults.offset,
+                description: "Moves the screenshot within the frame.",
+                label: "Offset",
+                performanceReason: liveReason,
+                performanceRole: "responsiveness",
+                target: isomockTargets.offset,
+                type: "vector",
+              },
+            },
+            id: "camera",
+            title: "Camera",
+          },
+          {
+            controls: {
+              focusPoint: {
+                applicability: always,
+                defaultValue: isomockDefaults.focusPoint,
+                description: "The spot on the screenshot that stays sharp. Blur grows with distance from its depth.",
+                label: "Focus point",
+                performanceReason: liveReason,
+                performanceRole: "responsiveness",
+                target: isomockTargets.focusPoint,
+                type: "vector",
+              },
+              blur: {
+                applicability: always,
+                defaultValue: isomockDefaults.blur,
+                label: "Blur",
+                max: 100,
+                min: 0,
+                performanceReason: liveReason,
+                performanceRole: "responsiveness",
+                sliderValueKind: "continuous",
+                step: 1,
+                target: isomockTargets.blur,
+                type: "slider",
+              },
+              sharpBand: {
+                applicability: always,
+                defaultValue: isomockDefaults.sharpBand,
+                description: "Depth around the focus point that stays fully sharp.",
+                label: "Sharp depth",
+                max: 1,
+                min: 0,
+                performanceReason: liveReason,
+                performanceRole: "responsiveness",
+                sliderValueKind: "continuous",
+                step: 0.01,
+                target: isomockTargets.sharpBand,
+                type: "slider",
+              },
+            },
+            id: "focus",
+            title: "Focus",
+          },
+          {
+            controls: {
+              grain: {
+                applicability: always,
+                defaultValue: isomockDefaults.grain,
+                label: "Grain",
+                max: 100,
+                min: 0,
+                performanceReason: liveReason,
+                performanceRole: "responsiveness",
+                sliderValueKind: "continuous",
+                step: 1,
+                target: isomockTargets.grain,
+                type: "slider",
+              },
+            },
+            id: "finish",
+            title: "Finish",
+          },
+          {
+            controls: {
+              includeBackground: {
+                applicability: always,
+                defaultValue: true,
+                label: "Include",
+                performanceReason: "Toggles runtime background fill only.",
+                performanceRole: "responsiveness",
+                target: isomockTargets.includeBackground,
+                type: "switch",
+              },
+              background: {
+                applicability: always,
+                defaultValue: isomockDefaults.background,
+                label: false,
+                performanceReason: "Changes runtime background fill only.",
+                performanceRole: "responsiveness",
+                target: isomockTargets.background,
+                type: "color",
+              },
+            },
+            id: "background",
+            layoutGroups: [
+              { columns: 2, controls: ["includeBackground", "background"], layout: "inline" },
+            ],
+            title: "Background",
+          },
+        ],
+        title: "Isomock",
       },
     },
     toolbar: {
       history: true,
       radar: true,
+      theme: true,
       zoom: true,
     },
   },
-  modules: [mediaSourceModule()],
+  modules: [mediaSourceModule(), spatialViewModule(), imageExportModule()],
 });
