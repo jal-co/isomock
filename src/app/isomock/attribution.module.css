@@ -38,7 +38,7 @@
 }
 
 .link {
-  color: color-mix(in oklab, var(--foreground) 80%, transparent);
+  color: inherit;
   text-decoration: none;
   transition: color 150ms ease;
 }
