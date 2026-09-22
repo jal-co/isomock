@@ -19,6 +19,7 @@ import {
 import { previewRenderPass, sourceDecodePass } from "./pipeline";
 import { readIsomockSettings, isomockTargets } from "./settings";
 import { decodeIsomockSource, findIsomockSource } from "./source";
+import { useIsomockFramingGestures } from "./use-framing-gestures";
 import styles from "./isomock-canvas.module.css";
 
 function readRenderScale(value: unknown): number {
@@ -103,6 +104,12 @@ export function IsomockCanvas(): React.JSX.Element {
       cancelAnimationFrame(frame);
     };
   }, [backingHeight, backingWidth, bitmap, camera, pipeline, settings, source?.transform]);
+
+  useIsomockFramingGestures(
+    canvasRef,
+    React.useMemo(() => ({ offset: settings.offset, zoom: settings.zoom }), [settings.offset, settings.zoom]),
+    bitmap ? imageAspect : null,
+  );
 
   const hitTest = React.useCallback(
     (clientX: number, clientY: number) => {

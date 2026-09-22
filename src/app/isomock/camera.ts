@@ -21,6 +21,14 @@ const add = (a: Vec3, b: Vec3): Vec3 => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
 const scale = (a: Vec3, s: number): Vec3 => [a[0] * s, a[1] * s, a[2] * s];
 const normalize = (a: Vec3): Vec3 => scale(a, 1 / (Math.hypot(...a) || 1));
 
+export function getIsomockFrameScale(
+  zoom: number,
+  imageAspect: number,
+  frameAspect: number,
+): number {
+  return zoom / (2 * Math.max(0.5, imageAspect / 2 / frameAspect));
+}
+
 export function createIsomockCamera(
   settings: IsomockSettings,
   imageAspect: number,
@@ -33,11 +41,7 @@ export function createIsomockCamera(
   const tanHalf = Math.tan((settings.fieldOfView * Math.PI) / 360);
   const fitHalfHeight = Math.max(0.5, imageAspect / 2 / frameAspect);
   const distance = fitHalfHeight / tanHalf / settings.zoom;
-  const panScale = (2 * fitHalfHeight) / settings.zoom;
-  const target = add(
-    scale(right, -settings.offset.x * panScale),
-    scale(up, settings.offset.y * panScale),
-  );
+  const target = add(scale(right, -settings.offset.x), scale(up, settings.offset.y));
   const position = add(target, scale(back, distance));
   const focusPoint: Vec3 = [
     (settings.focusPoint.x * imageAspect) / 2,

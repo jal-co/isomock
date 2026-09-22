@@ -72,8 +72,9 @@ export const appSchema = defineToolcraft({
               zoom: {
                 applicability: always,
                 defaultValue: isomockDefaults.zoom,
+                description: "Pinch or Ctrl-scroll over the screenshot to zoom around the cursor.",
                 label: "Zoom",
-                max: 6,
+                max: 12,
                 min: 0.5,
                 performanceReason: liveReason,
                 performanceRole: "responsiveness",
@@ -85,7 +86,7 @@ export const appSchema = defineToolcraft({
               offset: {
                 applicability: always,
                 defaultValue: isomockDefaults.offset,
-                description: "Moves the screenshot within the frame.",
+                description: "Two-finger scroll over the screenshot to pan it within the frame.",
                 label: "Offset",
                 performanceReason: liveReason,
                 performanceRole: "responsiveness",
