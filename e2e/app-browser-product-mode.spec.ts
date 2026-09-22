@@ -1,0 +1,41 @@
+import { expect, test } from "@playwright/test";
+
+test("requested modes follow Setup, hide inactive sections and preserve values through undo and reload", async ({ page }) => {
+  await page.goto("/e2e/browser-product-mode-fixture.html");
+  const mode = page.locator('[data-toolcraft-control-target="scene.mode"]');
+  const diagram = page.locator('[data-toolcraft-control-target="scene.caption"]');
+  const map = page.locator('[data-toolcraft-control-target="map.caption"]');
+  const sections = page.locator('section').filter({ has: page.locator('[data-control-list]') });
+  const output = page.locator("[data-product-mode-output]");
+  await expect(mode).toBeVisible();
+  await expect(sections.nth(0).getByRole("button", { name: "Export Settings", exact: true })).toBeVisible();
+  await expect(sections.nth(1).locator('[data-toolcraft-control-target="scene.mode"]')).toBeVisible();
+  await expect(diagram).toBeVisible();
+  await expect(map).toHaveCount(0);
+  await expect(sections).toHaveCount(3);
+  await diagram.getByRole("textbox").fill("Saved Diagram");
+  await diagram.getByRole("textbox").press("Enter");
+  await expect(output).toHaveText("Saved Diagram");
+  await mode.getByRole("button", { name: "Map", exact: true }).click();
+  await expect(diagram).toHaveCount(0);
+  await expect(map).toBeVisible();
+  await expect(sections).toHaveCount(3);
+  await expect(output).toHaveText("Map caption");
+  await map.getByRole("textbox").fill("Saved Map");
+  await map.getByRole("textbox").press("Enter");
+  await mode.getByRole("button", { name: "Diagram", exact: true }).click();
+  await expect(diagram.getByRole("textbox")).toHaveValue("Saved Diagram");
+  await page.keyboard.press("ControlOrMeta+z");
+  await expect(map.getByRole("textbox")).toHaveValue("Saved Map");
+  await expect(output).toHaveText("Saved Map");
+  await expect.poll(() => page.evaluate(() => {
+    const snapshot = JSON.parse(localStorage.getItem("toolcraft:product-mode-fixture:state:v2") ?? "null");
+    return snapshot?.state?.values?.["scene.mode"];
+  })).toBe("map");
+  await page.reload();
+  await expect(map.getByRole("textbox")).toHaveValue("Saved Map");
+  await expect(diagram).toHaveCount(0);
+  await mode.getByRole("button", { name: "Diagram", exact: true }).click();
+  await expect(diagram.getByRole("textbox")).toHaveValue("Saved Diagram");
+  await expect(output).toHaveText("Saved Diagram");
+});

@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "allowJs": true, "checkJs": false },
+  "include": [
+    "src",
+    "e2e/app-browser-control-applicability-requirements.spec.ts",
+    "e2e/app-browser-model-runtime-requirements.spec.ts",
+    "e2e/app-browser-render-scale-requirements.spec.ts",
+    "e2e/app-browser-runtime-requirements.spec.ts",
+    "e2e/browser-performance-reporter.spec.ts",
+    "e2e/performance-model-import-fixtures.spec.ts",
+    "e2e/performance-path-helpers.spec.ts",
+    "e2e/performance-pipeline-evidence-test-fixtures.ts",
+    "e2e/performance-render-scale-runner.spec.ts"
+  ]
+}

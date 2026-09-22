@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="UTF-8" /><link rel="icon" href="data:," /><title>VGPU direct surface compatibility</title></head>
+  <body style="background: black; margin: 0">
+    <canvas data-toolcraft-vgpu-product=""></canvas>
+    <button id="next">Next frame</button><button id="resize">Resize</button><button id="dispose">Dispose</button>
+    <button id="offscreen">Render offscreen</button><button id="unsupported">Unsupported export</button>
+    <canvas id="readback"></canvas><canvas id="export"></canvas>
+    <output id="offscreen-status"></output><output id="unsupported-status"></output>
+    <script type="module" src="./browser-vgpu-surface-fixture.ts"></script>
+  </body>
+</html>

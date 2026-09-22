@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 3,
+  "providers": {
+    "vgpu": {
+      "adapterContractVersion": 1,
+      "capability": "shader-webgpu-vgpu",
+      "requiredExports": [".", "./mock", "./node"],
+      "resolutionPolicy": "latest-stable",
+      "viteLoader": "@vgpu/wgsl/loader-vite"
+    }
+  }
+}
