@@ -69,17 +69,18 @@ export function IsomockAttribution(): React.JSX.Element | null {
             target="_blank"
           >
             jal-co
+          </a>{" "}
+          with{" "}
+          <a
+            className={styles.link}
+            href="https://toolcraft.sh"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Toolcraft
           </a>
         </span>
       </div>
-      <a
-        className={styles.credit}
-        href="https://toolcraft.sh"
-        rel="noreferrer"
-        target="_blank"
-      >
-        Built with Toolcraft
-      </a>
     </div>,
     host,
   );
