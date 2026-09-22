@@ -25,6 +25,7 @@ uniform float uFocusDepth;
 uniform float uBlur;
 uniform float uSharpBand;
 uniform float uGrain;
+uniform float uEdgeFade;
 uniform mat3 uSourceTransform;
 
 out vec4 outColor;
@@ -53,11 +54,13 @@ vec4 samplePlane(vec2 pixel, float footprintBoost) {
   if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return vec4(0.0);
   castRay(pixel + vec2(1.0, 0.0), uvX, depthX);
   castRay(pixel + vec2(0.0, 1.0), uvY, depthY);
+  float edgeDistance = min(min(uv.x, 1.0 - uv.x) * uImageWidth, min(uv.y, 1.0 - uv.y));
+  float fade = uEdgeFade > 0.0 ? smoothstep(0.0, uEdgeFade, edgeDistance) : 1.0;
   vec2 source = (uSourceTransform * vec3(uv, 1.0)).xy;
   vec2 dx = (uSourceTransform * vec3(uvX - uv, 0.0)).xy * uTextureSize;
   vec2 dy = (uSourceTransform * vec3(uvY - uv, 0.0)).xy * uTextureSize;
   float footprint = max(length(dx), length(dy)) * footprintBoost;
-  return textureLod(uTexture, source, log2(max(footprint, 1.0)));
+  return textureLod(uTexture, source, log2(max(footprint, 1.0))) * fade;
 }
 
 float circleOfConfusion(float depth) {
@@ -244,6 +247,7 @@ export function createIsomockGlRenderer(
       gl.uniform1f(uniform("uBlur"), settings.blur);
       gl.uniform1f(uniform("uSharpBand"), settings.sharpBand);
       gl.uniform1f(uniform("uGrain"), settings.grain);
+      gl.uniform1f(uniform("uEdgeFade"), settings.edgeFade * 0.005);
       gl.uniformMatrix3fv(uniform("uSourceTransform"), false, getIsomockSourceMatrix(transform));
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     },

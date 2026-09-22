@@ -3,6 +3,7 @@ import type { ToolcraftOrientationPose } from "@/toolcraft/runtime/react";
 export const isomockTargets = {
   background: "appearance.background",
   blur: "focus.blur",
+  edgeFade: "finish.edgeFade",
   fieldOfView: "camera.fieldOfView",
   focusPoint: "focus.point",
   grain: "finish.grain",
@@ -17,6 +18,7 @@ export const isomockTargets = {
 export const isomockDefaults = {
   background: "#0B0B0C",
   blur: 45,
+  edgeFade: 0,
   fieldOfView: 30,
   focusPoint: { x: 0, y: 0 },
   grain: 20,
@@ -34,6 +36,7 @@ export type Vec3 = readonly [number, number, number];
 
 export type IsomockSettings = Readonly<{
   blur: number;
+  edgeFade: number;
   fieldOfView: number;
   focusPoint: Vec2;
   grain: number;
@@ -66,6 +69,7 @@ export function readIsomockSettings(
   const pose = values[isomockTargets.pose] as Record<string, unknown> | undefined;
   return {
     blur: readNumber(values[isomockTargets.blur], isomockDefaults.blur),
+    edgeFade: readNumber(values[isomockTargets.edgeFade], isomockDefaults.edgeFade),
     fieldOfView: readNumber(values[isomockTargets.fieldOfView], isomockDefaults.fieldOfView),
     focusPoint: readVec2(values[isomockTargets.focusPoint], isomockDefaults.focusPoint),
     grain: readNumber(values[isomockTargets.grain], isomockDefaults.grain),
