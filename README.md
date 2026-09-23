@@ -30,7 +30,7 @@ npm run dev
 
 ## Deploy
 
-The app is a static build served by a Cloudflare Workers static-assets Worker (`wrangler.jsonc`).
+The app is a static build served by Cloudflare Workers static assets (`wrangler.jsonc`). A small Worker in `worker/index.js` runs only for `/` and rewrites the social meta tags to point at `public/og.jpg`.
 
 ```sh
 npm run deploy
