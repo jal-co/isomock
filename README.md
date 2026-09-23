@@ -6,7 +6,7 @@
   <a href="https://github.com/jal-co/isomock/commits/main"><img alt="Last commit" src="https://shieldcn.dev/github/last-commit/jal-co/isomock.svg?size=xs&variant=secondary" /></a>
 </p>
 
-Turn a flat screenshot into a tilted, depth-of-field mockup. Drop in an image, angle it, pick what stays sharp, and export a PNG.
+I always was inspired by the cool images I see companies like polar use for their blog posts... so I thought, why not create a tool that lets me turn a flat screenshot into a tilted, depth-of-field mockup. I have used sites like ultramock, but found that while it is great for comprehensive mockups (and I reccomend you try it), I needed something really simple. Just Drop in an image, angle it, pick what stays sharp, and export a PNG.
 
 **Live at [isomock.justin-levine.workers.dev](https://isomock.justin-levine.workers.dev)**
 
