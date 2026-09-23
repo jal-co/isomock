@@ -1,14 +1,14 @@
 # Isomock
 
 <p>
-  <a href="https://isomock.justin-levine.workers.dev"><img alt="Website" src="https://shieldcn.dev/badge/isomock-live-1d3f6e.svg?size=xs&variant=secondary&logo=cloudflare" /></a>
+  <a href="https://isomock.justinlevine.me"><img alt="Website" src="https://shieldcn.dev/badge/isomock-live-1d3f6e.svg?size=xs&variant=secondary&logo=cloudflare" /></a>
   <a href="https://github.com/jal-co/isomock/blob/main/LICENSE"><img alt="License" src="https://shieldcn.dev/github/license/jal-co/isomock.svg?size=xs&variant=secondary" /></a>
   <a href="https://github.com/jal-co/isomock/commits/main"><img alt="Last commit" src="https://shieldcn.dev/github/last-commit/jal-co/isomock.svg?size=xs&variant=secondary" /></a>
 </p>
 
 I always was inspired by the cool images I see companies like polar use for their blog posts... so I thought, why not create a tool that lets me turn a flat screenshot into a tilted, depth-of-field mockup. I have used sites like ultramock, but found that while it is great for comprehensive mockups (and I reccomend you try it), I needed something really simple. Just Drop in an image, angle it, pick what stays sharp, and export a PNG.
 
-**Live at [isomock.justin-levine.workers.dev](https://isomock.justin-levine.workers.dev)**
+**Live at [isomock.justinlevine.me](https://isomock.justinlevine.me)**
 
 ![The Mastra Studio sidebar tilted in perspective, sharp at the logo and blurred toward the edges](docs/assets/isomock-demo.jpg)
 

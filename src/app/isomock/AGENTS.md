@@ -45,6 +45,6 @@ Toolcraft's `npm run verify:delivery` does not pass yet. The product acceptance 
 
 ## Deploy
 
-Cloudflare Workers static assets, configured in `wrangler.jsonc` at the repo root. `npm run deploy` builds and deploys to https://isomock.justin-levine.workers.dev.
+Cloudflare Workers static assets, configured in `wrangler.jsonc` at the repo root. `npm run deploy` builds and deploys to https://isomock.justinlevine.me.
 
 `index.html` is signed by Toolcraft and ships its default OG tags. `worker/index.js` runs only for `/` and swaps them with `HTMLRewriter` for Isomock's title, description, and `public/og.jpg` (1200×630). Edit social metadata there, not in `index.html`.

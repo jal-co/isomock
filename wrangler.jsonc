@@ -2,6 +2,8 @@
   "name": "isomock",
   "main": "worker/index.js",
   "compatibility_date": "2026-09-22",
+  "workers_dev": true,
+  "routes": [{ "pattern": "isomock.justinlevine.me", "custom_domain": true }],
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist",
