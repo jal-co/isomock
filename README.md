@@ -10,6 +10,7 @@ I always was inspired by the cool images I see companies like polar use for thei
 
 **Live at [isomock.justin-levine.workers.dev](https://isomock.justin-levine.workers.dev)**
 
+![The Mastra Studio sidebar tilted in perspective, sharp at the logo and blurred toward the edges](docs/assets/isomock-demo.jpg)
 
 ## Features
 
