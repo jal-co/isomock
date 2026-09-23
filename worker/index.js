@@ -1,6 +1,6 @@
 const title = "Isomock";
 const description = "Turn screenshots into tilted, depth-of-field mockups.";
-const imageAlt = "A pricing page screenshot tilted in perspective with depth-of-field blur";
+const imageAlt = "The Mastra Studio sidebar tilted in perspective with depth-of-field blur";
 
 const setContent = (value) => ({ element: (element) => element.setAttribute("content", value) });
 
