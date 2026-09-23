@@ -10,7 +10,6 @@ Turn a flat screenshot into a tilted, depth-of-field mockup. Drop in an image, a
 
 **Live at [isomock.justin-levine.workers.dev](https://isomock.justin-levine.workers.dev)**
 
-![A pricing page screenshot tilted in perspective, sharp in the middle and blurred toward the edges](docs/assets/isomock-example.jpg)
 
 ## Features
 
