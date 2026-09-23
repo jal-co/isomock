@@ -18,15 +18,10 @@ import {
   type IsomockGlRenderer,
 } from "./gl-renderer";
 import { previewRenderPass, sourceDecodePass } from "./pipeline";
-import { readIsomockSettings, isomockTargets } from "./settings";
+import { finiteOr, readIsomockSettings, isomockTargets } from "./settings";
 import { decodeIsomockSource, findIsomockSource } from "./source";
 import { useIsomockFramingGestures } from "./use-framing-gestures";
 import styles from "./isomock-canvas.module.css";
-
-function readRenderScale(value: unknown): number {
-  const numeric = Number(value);
-  return Number.isFinite(numeric) ? Math.min(2, Math.max(1, numeric)) : 2;
-}
 
 export function IsomockCanvas(): React.JSX.Element {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -35,7 +30,10 @@ export function IsomockCanvas(): React.JSX.Element {
   const sceneFrame = useToolcraftProductSceneFrame();
   const pipeline = useToolcraftPipeline();
   const values = useToolcraftEvaluatedValues();
-  const renderScale = readRenderScale(useToolcraftValue("canvas.renderScale"));
+  const renderScale = Math.min(
+    2,
+    Math.max(1, finiteOr(Number(useToolcraftValue("canvas.renderScale")), 2)),
+  );
   const mediaAssets = useToolcraftSelector((state) => state.mediaAssets);
   const source = findIsomockSource(mediaAssets);
   const sourceAssets = React.useMemo(() => (source ? [source] : []), [source]);

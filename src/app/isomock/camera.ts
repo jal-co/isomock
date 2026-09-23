@@ -41,7 +41,10 @@ export function createIsomockCamera(
   const tanHalf = Math.tan((settings.fieldOfView * Math.PI) / 360);
   const fitHalfHeight = Math.max(0.5, imageAspect / 2 / frameAspect);
   const distance = fitHalfHeight / tanHalf / settings.zoom;
-  const target = add(scale(right, -settings.offset.x), scale(up, settings.offset.y));
+  const target = add(
+    scale(right, -settings.offset.x),
+    scale(up, settings.offset.y),
+  );
   const position = add(target, scale(back, distance));
   const focusPoint: Vec3 = [
     (settings.focusPoint.x * imageAspect) / 2,

@@ -102,15 +102,35 @@ export const isomockPipelineRegistration =
         runsOn: "main",
         sceneBounds: {
           kind: "intrinsic",
-          reason: "Decoding keeps the uploaded screenshot's own complete pixel domain.",
+          reason:
+            "Decoding keeps the uploaded screenshot's own complete pixel domain.",
         },
       },
       {
-        cost: { dimensions: ["preview-pixels"], frequency: "interaction", relationship: "linear" },
-        gpu: { resources: "sampled-textures", stage: "render", state: "stateless", surfaces: ["preview"] },
+        cost: {
+          dimensions: ["preview-pixels"],
+          frequency: "interaction",
+          relationship: "linear",
+        },
+        gpu: {
+          resources: "sampled-textures",
+          stage: "render",
+          state: "stateless",
+          surfaces: ["preview"],
+        },
         id: "preview-render",
-        inputs: ["source-decode", ...liveTargets, "canvas.backing.width", "canvas.backing.height"],
-        invalidatedBy: ["source-decode", ...liveTargets, "canvas.backing.width", "canvas.backing.height"],
+        inputs: [
+          "source-decode",
+          ...liveTargets,
+          "canvas.backing.width",
+          "canvas.backing.height",
+        ],
+        invalidatedBy: [
+          "source-decode",
+          ...liveTargets,
+          "canvas.backing.width",
+          "canvas.backing.height",
+        ],
         kind: "composite",
         lifecycle: { cache: "none", resourceScope: "call" },
         output: "preview",
@@ -119,11 +139,24 @@ export const isomockPipelineRegistration =
         sceneBounds: cameraFrameBounds,
       },
       {
-        cost: { dimensions: ["export-pixels"], frequency: "batch", relationship: "linear" },
-        gpu: { resources: "sampled-textures", stage: "render", state: "stateless", surfaces: ["export"] },
+        cost: {
+          dimensions: ["export-pixels"],
+          frequency: "batch",
+          relationship: "linear",
+        },
+        gpu: {
+          resources: "sampled-textures",
+          stage: "render",
+          state: "stateless",
+          surfaces: ["export"],
+        },
         id: "export-render",
         inputs: ["source-decode", ...liveTargets, "export.image.resolution"],
-        invalidatedBy: ["source-decode", ...liveTargets, "export.image.resolution"],
+        invalidatedBy: [
+          "source-decode",
+          ...liveTargets,
+          "export.image.resolution",
+        ],
         kind: "export",
         lifecycle: { cache: "none", resourceScope: "call" },
         output: "export",
@@ -134,6 +167,9 @@ export const isomockPipelineRegistration =
     runtimeId: "isomock-tilt-focus-v1",
   });
 
-export const sourceDecodePass = isomockPipelineRegistration.getPass("source-decode");
-export const previewRenderPass = isomockPipelineRegistration.getPass("preview-render");
-export const exportRenderPass = isomockPipelineRegistration.getPass("export-render");
+export const sourceDecodePass =
+  isomockPipelineRegistration.getPass("source-decode");
+export const previewRenderPass =
+  isomockPipelineRegistration.getPass("preview-render");
+export const exportRenderPass =
+  isomockPipelineRegistration.getPass("export-render");

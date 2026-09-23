@@ -1,21 +1,36 @@
 import type { ToolcraftProductExportRenderer } from "@/toolcraft/runtime";
 
 import { createIsomockCamera } from "./camera";
-import { createIsomockGlRenderer, getIsomockDisplayAspect } from "./gl-renderer";
+import {
+  createIsomockGlRenderer,
+  getIsomockDisplayAspect,
+} from "./gl-renderer";
 import { exportRenderPass, sourceDecodePass } from "./pipeline";
 import { readIsomockSettings } from "./settings";
 import { decodeIsomockSource, findIsomockSource } from "./source";
 
 export const isomockExportRenderer: ToolcraftProductExportRenderer = {
   baseFileName: "isomock",
-  async renderFrame({ context, frame, pixelRatio, rendererPipeline, signal, state }) {
+  async renderFrame({
+    context,
+    frame,
+    pixelRatio,
+    rendererPipeline,
+    signal,
+    state,
+  }) {
     const source = findIsomockSource(state.mediaAssets);
     if (!source) return;
-    if (!rendererPipeline) throw new Error("Isomock export requires its renderer pipeline.");
+    if (!rendererPipeline)
+      throw new Error("Isomock export requires its renderer pipeline.");
     const bitmap = await rendererPipeline.runPass(
       sourceDecodePass,
-      { "source.presentationUrl": null, "source.resourceRef": source.resourceRef },
-      (passContext) => decodeIsomockSource(passContext, source.resourceRef, undefined),
+      {
+        "source.presentationUrl": null,
+        "source.resourceRef": source.resourceRef,
+      },
+      (passContext) =>
+        decodeIsomockSource(passContext, source.resourceRef, undefined),
     );
     signal.throwIfAborted();
     if (!bitmap) return;

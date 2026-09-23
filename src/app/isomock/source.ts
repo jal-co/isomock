@@ -38,14 +38,19 @@ async function decodeFromUrl(url: string): Promise<ImageBitmap> {
 }
 
 export function decodeIsomockSource(
-  context: ToolcraftRendererPipelinePassExecutionContext<typeof sourceDecodePass>,
+  context: ToolcraftRendererPipelinePassExecutionContext<
+    typeof sourceDecodePass
+  >,
   resourceRef: string,
   url: string | undefined,
 ): Promise<ImageBitmap> {
   return context.getOrCreateResource(
     [resourceRef],
     () => {
-      if (!url) throw new Error("The screenshot is still loading. Try again in a moment.");
+      if (!url)
+        throw new Error(
+          "The screenshot is still loading. Try again in a moment.",
+        );
       return decodeFromUrl(url);
     },
     (bitmap) => bitmap.close(),

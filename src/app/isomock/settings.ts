@@ -1,4 +1,8 @@
-import type { ToolcraftOrientationPose } from "@/toolcraft/runtime/react";
+import {
+  readToolcraftOrientationPose,
+  type ToolcraftOrientationPose,
+  type useToolcraftEvaluatedValues,
+} from "@/toolcraft/runtime/react";
 
 export const isomockTargets = {
   background: "appearance.background",
@@ -41,44 +45,44 @@ export type IsomockSettings = Readonly<{
   focusPoint: Vec2;
   grain: number;
   offset: Vec2;
-  pose: Readonly<{ position: Vec3; up: Vec3 }>;
+  pose: ToolcraftOrientationPose;
   sharpBand: number;
   zoom: number;
 }>;
 
-function readNumber(value: unknown, fallback: number): number {
-  const numeric = Number(value);
-  return Number.isFinite(numeric) ? numeric : fallback;
-}
-
-function readVec2(value: unknown, fallback: Vec2): Vec2 {
-  if (typeof value !== "object" || value === null) return fallback;
-  const record = value as Record<string, unknown>;
-  return { x: readNumber(record.x, fallback.x), y: readNumber(record.y, fallback.y) };
-}
-
-function readVec3(value: unknown, fallback: Vec3): Vec3 {
-  if (!Array.isArray(value) || value.length !== 3) return fallback;
-  const [x, y, z] = value.map(Number);
-  return [x, y, z].every(Number.isFinite) ? [x, y, z] : fallback;
+export function finiteOr(value: number, fallback: number): number {
+  return Number.isFinite(value) ? value : fallback;
 }
 
 export function readIsomockSettings(
-  values: Readonly<Record<string, unknown>>,
+  values: ReturnType<typeof useToolcraftEvaluatedValues>,
 ): IsomockSettings {
-  const pose = values[isomockTargets.pose] as Record<string, unknown> | undefined;
+  const number = (target: string, fallback: number) =>
+    finiteOr(Number(values[target]), fallback);
+  const vec2 = (target: string, fallback: Vec2): Vec2 => {
+    const value = values[target];
+    if (!(value instanceof Object) || !("x" in value) || !("y" in value))
+      return fallback;
+    return {
+      x: finiteOr(Number(value.x), fallback.x),
+      y: finiteOr(Number(value.y), fallback.y),
+    };
+  };
   return {
-    blur: readNumber(values[isomockTargets.blur], isomockDefaults.blur),
-    edgeFade: readNumber(values[isomockTargets.edgeFade], isomockDefaults.edgeFade),
-    fieldOfView: readNumber(values[isomockTargets.fieldOfView], isomockDefaults.fieldOfView),
-    focusPoint: readVec2(values[isomockTargets.focusPoint], isomockDefaults.focusPoint),
-    grain: readNumber(values[isomockTargets.grain], isomockDefaults.grain),
-    offset: readVec2(values[isomockTargets.offset], isomockDefaults.offset),
-    pose: {
-      position: readVec3(pose?.position, isomockDefaults.pose.position),
-      up: readVec3(pose?.up, isomockDefaults.pose.up),
-    },
-    sharpBand: readNumber(values[isomockTargets.sharpBand], isomockDefaults.sharpBand),
-    zoom: readNumber(values[isomockTargets.zoom], isomockDefaults.zoom),
+    blur: number(isomockTargets.blur, isomockDefaults.blur),
+    edgeFade: number(isomockTargets.edgeFade, isomockDefaults.edgeFade),
+    fieldOfView: number(
+      isomockTargets.fieldOfView,
+      isomockDefaults.fieldOfView,
+    ),
+    focusPoint: vec2(isomockTargets.focusPoint, isomockDefaults.focusPoint),
+    grain: number(isomockTargets.grain, isomockDefaults.grain),
+    offset: vec2(isomockTargets.offset, isomockDefaults.offset),
+    pose: readToolcraftOrientationPose(
+      values[isomockTargets.pose],
+      isomockDefaults.pose,
+    ),
+    sharpBand: number(isomockTargets.sharpBand, isomockDefaults.sharpBand),
+    zoom: number(isomockTargets.zoom, isomockDefaults.zoom),
   };
 }
