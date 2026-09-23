@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { Button } from "@/toolcraft/ui";
+import { Anchor, Button } from "@/toolcraft/ui";
 
 import styles from "./attribution.module.css";
 
@@ -52,7 +52,9 @@ export function IsomockAttribution(): React.JSX.Element | null {
               key={link.href}
               nativeButton={false}
               radius="full"
-              render={<a href={link.href} rel="noreferrer" target="_blank" />}
+              render={
+                <Anchor href={link.href} rel="noreferrer" target="_blank" />
+              }
               size="icon"
               variant="ghost-muted"
             >
@@ -62,23 +64,23 @@ export function IsomockAttribution(): React.JSX.Element | null {
         </div>
         <span className={styles.credit}>
           Created by{" "}
-          <a
+          <Anchor
             className={styles.link}
             href="https://github.com/jal-co"
             rel="noreferrer"
             target="_blank"
           >
             jal-co
-          </a>{" "}
+          </Anchor>{" "}
           with{" "}
-          <a
+          <Anchor
             className={styles.link}
             href="https://toolcraft.sh"
             rel="noreferrer"
             target="_blank"
           >
             Toolcraft
-          </a>
+          </Anchor>
         </span>
       </div>
     </div>,

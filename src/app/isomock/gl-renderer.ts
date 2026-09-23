@@ -175,7 +175,7 @@ export type IsomockGlRenderer = Readonly<{
 }>;
 
 export function createIsomockGlRenderer(
-  canvas: HTMLCanvasElement,
+  canvas: HTMLCanvasElement | OffscreenCanvas,
   options: Readonly<{ disposable: boolean }>,
 ): IsomockGlRenderer {
   const gl = canvas.getContext("webgl2", {

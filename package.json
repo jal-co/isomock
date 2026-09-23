@@ -23,7 +23,8 @@
     "verify:delivery": "node scripts/run-delivery-verification.mjs",
     "verify:perf": "node scripts/run-browser-performance.mjs",
     "verify:kernel": "node scripts/run-kernel-benchmarks.mjs",
-    "verify:receipt": "node scripts/toolcraft-verification-receipt.mjs validate"
+    "verify:receipt": "node scripts/toolcraft-verification-receipt.mjs validate",
+    "deploy": "npm run build && npx wrangler@4 deploy"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

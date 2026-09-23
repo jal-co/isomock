@@ -38,7 +38,7 @@ export const isomockExportRenderer: ToolcraftProductExportRenderer = {
     const width = Math.max(1, Math.round(frame.width * pixelRatio));
     const height = Math.max(1, Math.round(frame.height * pixelRatio));
     await rendererPipeline.runPass(exportRenderPass, undefined, () => {
-      const canvas = document.createElement("canvas");
+      const canvas = new OffscreenCanvas(width, height);
       const renderer = createIsomockGlRenderer(canvas, { disposable: true });
       try {
         const settings = readIsomockSettings(state.values);
@@ -57,8 +57,6 @@ export const isomockExportRenderer: ToolcraftProductExportRenderer = {
         context.drawImage(canvas, frame.x, frame.y, frame.width, frame.height);
       } finally {
         renderer.dispose();
-        canvas.width = 1;
-        canvas.height = 1;
       }
     });
   },
