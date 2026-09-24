@@ -7,7 +7,11 @@ import {
 
 import appDefaults from "./app-defaults.json" with { type: "json" };
 import { appIdentity } from "./app-identity";
-import { matchBackgroundAction } from "./isomock/match-background";
+import {
+  centerFocusAction,
+  matchBackgroundAction,
+  resetRotationAction,
+} from "./isomock/match-background";
 import { isomockDefaults, isomockTargets } from "./isomock/settings";
 
 const always = { mode: "always" } as const;
@@ -54,6 +58,13 @@ export const appSchema = defineToolcraft({
                 performanceRole: "responsiveness",
                 target: isomockTargets.pose,
                 type: "orientationGizmo",
+              },
+              resetRotation: {
+                actions: [{ label: "Reset rotation", value: resetRotationAction }],
+                applicability: always,
+                label: false,
+                target: "actions.resetRotation",
+                type: "actions",
               },
               fieldOfView: {
                 applicability: always,
@@ -110,6 +121,13 @@ export const appSchema = defineToolcraft({
                 target: isomockTargets.focusPoint,
                 type: "vector",
               },
+              centerFocus: {
+                actions: [{ label: "Center in frame", value: centerFocusAction }],
+                applicability: always,
+                label: false,
+                target: "actions.centerFocus",
+                type: "actions",
+              },
               blur: {
                 applicability: always,
                 defaultValue: isomockDefaults.blur,
@@ -156,6 +174,20 @@ export const appSchema = defineToolcraft({
                 target: isomockTargets.grain,
                 type: "slider",
               },
+              aberration: {
+                applicability: always,
+                defaultValue: isomockDefaults.aberration,
+                description: "Splits red and blue toward the frame edges, like a real lens.",
+                label: "Chromatic aberration",
+                max: 100,
+                min: 0,
+                performanceReason: liveReason,
+                performanceRole: "responsiveness",
+                sliderValueKind: "continuous",
+                step: 1,
+                target: isomockTargets.aberration,
+                type: "slider",
+              },
               edgeFade: {
                 applicability: always,
                 defaultValue: isomockDefaults.edgeFade,
@@ -168,6 +200,21 @@ export const appSchema = defineToolcraft({
                 sliderValueKind: "continuous",
                 step: 1,
                 target: isomockTargets.edgeFade,
+                type: "slider",
+                unit: "%",
+              },
+              edgeExtend: {
+                applicability: always,
+                defaultValue: isomockDefaults.edgeExtend,
+                description: "Continues the screenshot's edge pixels past its border and feathers them out, so it reads as one surface instead of a card.",
+                label: "Edge extend",
+                max: 100,
+                min: 0,
+                performanceReason: liveReason,
+                performanceRole: "responsiveness",
+                sliderValueKind: "continuous",
+                step: 1,
+                target: isomockTargets.edgeExtend,
                 type: "slider",
                 unit: "%",
               },

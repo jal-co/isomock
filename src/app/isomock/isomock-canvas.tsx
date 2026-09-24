@@ -11,6 +11,7 @@ import {
 } from "@/toolcraft/runtime/react";
 
 import { IsomockAttribution } from "./attribution";
+import { IsomockAxisLegend } from "./axis-legend";
 import { createIsomockCamera, isomockRayHitsImage } from "./camera";
 import {
   createIsomockGlRenderer,
@@ -37,9 +38,20 @@ export function IsomockCanvas(): React.JSX.Element {
   const mediaAssets = useToolcraftSelector((state) => state.mediaAssets);
   const source = findIsomockSource(mediaAssets);
   const sourceAssets = React.useMemo(() => (source ? [source] : []), [source]);
-  const presentationUrl = useToolcraftMediaPresentationUrls(sourceAssets).get(
+  const latestUrl = useToolcraftMediaPresentationUrls(sourceAssets).get(
     source?.id ?? "",
   );
+  const [urlOwner, setUrlOwner] = React.useState({
+    resourceRef: source?.resourceRef,
+    url: latestUrl,
+  });
+  if (urlOwner.url !== latestUrl) {
+    setUrlOwner({ resourceRef: source?.resourceRef, url: latestUrl });
+  }
+  const presentationUrl =
+    urlOwner.url === latestUrl && urlOwner.resourceRef === source?.resourceRef
+      ? latestUrl
+      : undefined;
   const settings = React.useMemo(() => readIsomockSettings(values), [values]);
 
   const decoded = useToolcraftPipelinePass(
@@ -158,6 +170,7 @@ export function IsomockCanvas(): React.JSX.Element {
   return (
     <>
       <IsomockAttribution />
+      <IsomockAxisLegend />
       <canvas
         {...orbit}
         className={styles.canvas}

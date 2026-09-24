@@ -31,6 +31,8 @@ const liveTargets = [
   isomockTargets.sharpBand,
   isomockTargets.grain,
   isomockTargets.edgeFade,
+  isomockTargets.edgeExtend,
+  isomockTargets.aberration,
 ] as const;
 
 export const isomockPipelineRegistration =

@@ -16,8 +16,8 @@ I always was inspired by the cool images I see companies like polar use for thei
 
 - **Tilt** the screenshot in 3D by dragging it, or with the orientation gizmo. Field of view runs from near-isometric (5°) to strong perspective (90°)
 - **Frame** the shot directly on the canvas: pinch or Ctrl/⌘-scroll to zoom around the cursor, two-finger scroll to pan. What you frame is what exports
-- **Focus** on any point of the screenshot. Blur grows with depth away from it, with an adjustable sharp band
-- **Finish** with film grain and a feathered edge that fades the screenshot into the background
+- **Focus** on any point of the screenshot, or snap it to whatever sits in the middle of the frame. Blur grows with depth away from it, with an adjustable sharp band
+- **Finish** with film grain, chromatic aberration, a feathered edge that fades the screenshot into the background, and an edge extend that continues its border pixels outward so it reads as one surface
 - **Match screenshot** sets the background to the image's edge color in one click
 - Export PNG or JPG at 2K, 4K, or 8K, with an optional transparent background
 - Save and import settings as JSON

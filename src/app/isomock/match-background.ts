@@ -1,9 +1,13 @@
 import type { ToolcraftPanelActionHandler } from "@/toolcraft/runtime/react";
 
-import { isomockTargets } from "./settings";
+import { createIsomockCamera, getIsomockFrameCenterFocus } from "./camera";
+import { getIsomockDisplayAspect } from "./gl-renderer";
+import { isomockTargets, readIsomockSettings } from "./settings";
 import { findIsomockSource } from "./source";
 
 export const matchBackgroundAction = "isomock.match-background";
+export const centerFocusAction = "isomock.center-focus";
+export const resetRotationAction = "isomock.reset-rotation";
 
 const sampleEdge = 64;
 
@@ -37,8 +41,30 @@ export const handleIsomockPanelAction: ToolcraftPanelActionHandler = async ({
   resolveMediaResource,
   state,
 }) => {
-  if (action.value !== matchBackgroundAction) return;
+  if (action.value === resetRotationAction) {
+    dispatch({
+      label: "Reset rotation",
+      targets: [isomockTargets.pose],
+      type: "controls.resetTargets",
+    });
+    return;
+  }
   const source = findIsomockSource(state.mediaAssets);
+  if (action.value === centerFocusAction) {
+    const camera = createIsomockCamera(
+      readIsomockSettings(state.values),
+      source ? getIsomockDisplayAspect(source.sourceSize, source.transform) : 1,
+      state.canvas.size.width / state.canvas.size.height,
+    );
+    dispatch({
+      label: "Center focus",
+      target: isomockTargets.focusPoint,
+      type: "controls.setValue",
+      value: getIsomockFrameCenterFocus(camera),
+    });
+    return;
+  }
+  if (action.value !== matchBackgroundAction) return;
   if (!source) {
     reportFeedback({
       code: "isomock-no-screenshot",

@@ -1,0 +1,43 @@
+.legend {
+  bottom: 18px;
+  color: color-mix(in oklab, var(--foreground) 55%, transparent);
+  display: flex;
+  flex-direction: column;
+  font-size: 11px;
+  gap: 4px;
+  left: 100px;
+  pointer-events: none;
+  position: fixed;
+  z-index: 20;
+}
+
+.axes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.axis {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  border-radius: 999px;
+  height: 7px;
+  width: 7px;
+}
+
+.name {
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  width: 8px;
+}
+
+.hint {
+  margin: 0;
+}

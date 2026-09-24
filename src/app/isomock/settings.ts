@@ -5,8 +5,10 @@ import {
 } from "@/toolcraft/runtime/react";
 
 export const isomockTargets = {
+  aberration: "finish.aberration",
   background: "appearance.background",
   blur: "focus.blur",
+  edgeExtend: "finish.edgeExtend",
   edgeFade: "finish.edgeFade",
   fieldOfView: "camera.fieldOfView",
   focusPoint: "focus.point",
@@ -20,8 +22,10 @@ export const isomockTargets = {
 } as const;
 
 export const isomockDefaults = {
+  aberration: 0,
   background: "#0B0B0C",
   blur: 45,
+  edgeExtend: 0,
   edgeFade: 0,
   fieldOfView: 30,
   focusPoint: { x: 0, y: 0 },
@@ -39,7 +43,9 @@ export type Vec2 = Readonly<{ x: number; y: number }>;
 export type Vec3 = readonly [number, number, number];
 
 export type IsomockSettings = Readonly<{
+  aberration: number;
   blur: number;
+  edgeExtend: number;
   edgeFade: number;
   fieldOfView: number;
   focusPoint: Vec2;
@@ -69,7 +75,9 @@ export function readIsomockSettings(
     };
   };
   return {
+    aberration: number(isomockTargets.aberration, isomockDefaults.aberration),
     blur: number(isomockTargets.blur, isomockDefaults.blur),
+    edgeExtend: number(isomockTargets.edgeExtend, isomockDefaults.edgeExtend),
     edgeFade: number(isomockTargets.edgeFade, isomockDefaults.edgeFade),
     fieldOfView: number(
       isomockTargets.fieldOfView,

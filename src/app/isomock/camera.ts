@@ -1,4 +1,4 @@
-import type { IsomockSettings, Vec3 } from "./settings";
+import type { IsomockSettings, Vec2, Vec3 } from "./settings";
 
 export type IsomockCamera = Readonly<{
   aspect: number;
@@ -89,4 +89,11 @@ export function isomockRayHitsImage(
 ): boolean {
   const hit = projectIsomockRay(camera, ndcX, ndcY);
   return !!hit && hit.u >= 0 && hit.u <= 1 && hit.v >= 0 && hit.v <= 1;
+}
+
+export function getIsomockFrameCenterFocus(camera: IsomockCamera): Vec2 {
+  const hit = projectIsomockRay(camera, 0, 0);
+  if (!hit) return { x: 0, y: 0 };
+  const clampUnit = (value: number) => Math.min(1, Math.max(0, value));
+  return { x: clampUnit(hit.u) * 2 - 1, y: clampUnit(hit.v) * 2 - 1 };
 }

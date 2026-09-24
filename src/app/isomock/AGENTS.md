@@ -12,13 +12,14 @@ A screenshot mockup tool. One uploaded image is rendered on a tilted 3D plane wi
 | --- | --- |
 | `settings.ts` | Control targets, defaults, and parsing runtime values into `IsomockSettings` |
 | `camera.ts` | Camera basis from the orientation pose, framing (zoom/offset), focus depth, ray/plane hit test |
-| `gl-renderer.ts` | WebGL2 program: analytic ray/plane cast, disc-gather depth of field, grain, edge fade, media rotate/flip |
+| `gl-renderer.ts` | WebGL2 program: analytic ray/plane cast, disc-gather depth of field, chromatic aberration, grain, edge fade and extend, media rotate/flip |
 | `pipeline.ts` | Toolcraft renderer pipeline registration (`source-decode`, `preview-render`, `export-render`) |
 | `source.ts` | Finding the screenshot asset and decoding it as a retained, source-scoped `ImageBitmap` |
 | `isomock-canvas.tsx` | Live preview, orbit drag, framing gestures, attribution mount |
 | `use-framing-gestures.ts` | Pinch/Ctrl-scroll zoom and two-finger pan over the screenshot, written to `camera.zoom` and `camera.offset` |
 | `export.ts` | `scene.rasterFrameRenderer`: renders the same shader into a disposable WebGL canvas at artifact size |
-| `match-background.ts` | "Match screenshot" action: median edge color into `appearance.background` |
+| `match-background.ts` | Panel actions: "Match screenshot" (median edge color into `appearance.background`) and "Center in frame" (focus point under the frame center), "Reset rotation" (pose back to its default) |
+| `axis-legend.tsx` | X/Y/Z color key beside the runtime gizmo, portaled to `document.body` so it never exports |
 | `attribution.tsx` | Top-left X/GitHub/credit links, portaled to `document.body` so they never export |
 
 Schema lives in `src/app/app-schema.ts`; ports are wired in `src/app/app-composition.tsx`.

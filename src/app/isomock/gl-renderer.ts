@@ -26,6 +26,8 @@ uniform float uBlur;
 uniform float uSharpBand;
 uniform float uGrain;
 uniform float uEdgeFade;
+uniform float uEdgeExtend;
+uniform float uAberration;
 uniform mat3 uSourceTransform;
 
 out vec4 outColor;
@@ -51,12 +53,17 @@ vec4 samplePlane(vec2 pixel, float footprintBoost) {
   vec2 uvX; float depthX;
   vec2 uvY; float depthY;
   if (!castRay(pixel, uv, depth)) return vec4(0.0);
-  if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return vec4(0.0);
+  vec2 inside = vec2(min(uv.x, 1.0 - uv.x) * uImageWidth, min(uv.y, 1.0 - uv.y));
+  float edgeDistance = min(inside.x, inside.y) >= 0.0
+    ? min(inside.x, inside.y)
+    : -length(min(inside, 0.0));
+  if (edgeDistance < 0.0 && edgeDistance <= -uEdgeExtend) return vec4(0.0);
+  float fade = uEdgeFade > 0.0 || uEdgeExtend > 0.0
+    ? smoothstep(-uEdgeExtend, uEdgeFade, edgeDistance)
+    : 1.0;
   castRay(pixel + vec2(1.0, 0.0), uvX, depthX);
   castRay(pixel + vec2(0.0, 1.0), uvY, depthY);
-  float edgeDistance = min(min(uv.x, 1.0 - uv.x) * uImageWidth, min(uv.y, 1.0 - uv.y));
-  float fade = uEdgeFade > 0.0 ? smoothstep(0.0, uEdgeFade, edgeDistance) : 1.0;
-  vec2 source = (uSourceTransform * vec3(uv, 1.0)).xy;
+  vec2 source = (uSourceTransform * vec3(clamp(uv, 0.0, 1.0), 1.0)).xy;
   vec2 dx = (uSourceTransform * vec3(uvX - uv, 0.0)).xy * uTextureSize;
   vec2 dy = (uSourceTransform * vec3(uvY - uv, 0.0)).xy * uTextureSize;
   float footprint = max(length(dx), length(dy)) * footprintBoost;
@@ -71,8 +78,7 @@ float grainNoise(vec2 cell) {
   return fract(sin(dot(cell, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-void main() {
-  vec2 pixel = gl_FragCoord.xy;
+vec4 gatherBokeh(vec2 pixel) {
   vec2 uv; float depth;
   float radius = castRay(pixel, uv, depth) ? circleOfConfusion(depth) : 0.0;
   radius = max(radius, 0.5);
@@ -85,7 +91,18 @@ void main() {
     float distance = radius * sqrt((float(index) + 0.5) / float(count));
     color += samplePlane(pixel + distance * vec2(cos(angle), sin(angle)), max(spacing, 1.0));
   }
-  color /= float(count);
+  return color / float(count);
+}
+
+void main() {
+  vec2 pixel = gl_FragCoord.xy;
+  vec4 color = gatherBokeh(pixel);
+  if (uAberration > 0.0) {
+    vec2 fromCenter = (pixel - uResolution * 0.5) * uAberration;
+    vec4 red = gatherBokeh(pixel + fromCenter);
+    vec4 blue = gatherBokeh(pixel - fromCenter);
+    color = vec4(red.r, color.g, blue.b, max(color.a, max(red.a, blue.a)));
+  }
   vec2 grainCell = floor(pixel * 1080.0 / uResolution.y);
   color.rgb += (grainNoise(grainCell) - 0.5) * uGrain * 0.004 * color.a;
   outColor = clamp(color, 0.0, 1.0);
@@ -274,6 +291,8 @@ export function createIsomockGlRenderer(
       gl.uniform1f(uniform("uSharpBand"), settings.sharpBand);
       gl.uniform1f(uniform("uGrain"), settings.grain);
       gl.uniform1f(uniform("uEdgeFade"), settings.edgeFade * 0.005);
+      gl.uniform1f(uniform("uEdgeExtend"), settings.edgeExtend * 0.02);
+      gl.uniform1f(uniform("uAberration"), settings.aberration * 0.0002);
       gl.uniformMatrix3fv(
         uniform("uSourceTransform"),
         false,
