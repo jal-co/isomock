@@ -176,16 +176,23 @@ function compile(
   return shader;
 }
 
+export type IsomockTextureSource = Readonly<{
+  height: number;
+  pixels: ImageBitmap | HTMLVideoElement;
+  width: number;
+}>;
+
 export type IsomockRenderInput = Readonly<{
   camera: IsomockCamera;
   height: number;
   settings: IsomockSettings;
-  source: ImageBitmap;
+  source: IsomockTextureSource;
   transform: IsomockSourceTransform | undefined;
   width: number;
 }>;
 
 export type IsomockGlRenderer = Readonly<{
+  canvas: HTMLCanvasElement | OffscreenCanvas;
   clear(width: number, height: number): void;
   dispose(): void;
   render(input: IsomockRenderInput): void;
@@ -193,7 +200,6 @@ export type IsomockGlRenderer = Readonly<{
 
 export function createIsomockGlRenderer(
   canvas: HTMLCanvasElement | OffscreenCanvas,
-  options: Readonly<{ disposable: boolean }>,
 ): IsomockGlRenderer {
   const gl = canvas.getContext("webgl2", {
     alpha: true,
@@ -229,11 +235,11 @@ export function createIsomockGlRenderer(
   const texture = gl.createTexture();
   let uploadedSource: ImageBitmap | null = null;
 
-  const upload = (source: ImageBitmap) => {
-    if (uploadedSource === source) return;
+  const upload = ({ pixels }: IsomockTextureSource) => {
+    if (uploadedSource === pixels) return;
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
     gl.generateMipmap(gl.TEXTURE_2D);
     gl.texParameteri(
       gl.TEXTURE_2D,
@@ -243,7 +249,7 @@ export function createIsomockGlRenderer(
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    uploadedSource = source;
+    uploadedSource = pixels instanceof ImageBitmap ? pixels : null;
   };
 
   const resize = (width: number, height: number) => {
@@ -253,6 +259,7 @@ export function createIsomockGlRenderer(
   };
 
   return {
+    canvas,
     clear(width, height) {
       resize(width, height);
       gl.clearColor(0, 0, 0, 0);
@@ -263,8 +270,6 @@ export function createIsomockGlRenderer(
       gl.deleteBuffer(buffer);
       gl.deleteVertexArray(vertexArray);
       gl.deleteProgram(program);
-      if (options.disposable)
-        gl.getExtension("WEBGL_lose_context")?.loseContext();
       uploadedSource = null;
     },
     render({ camera, height, settings, source, transform, width }) {

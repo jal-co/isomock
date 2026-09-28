@@ -4,7 +4,7 @@ Product notes for agents editing Isomock. The root `AGENTS.md` is the signed Too
 
 ## What it is
 
-A screenshot mockup tool. One uploaded image is rendered on a tilted 3D plane with depth-of-field blur, grain, and an edge fade, then exported as PNG/JPG.
+A screenshot mockup tool. One uploaded image or video is rendered on a tilted 3D plane with depth-of-field blur, grain, and an edge fade, then exported as PNG/JPG or MP4/WebM. Video has no product animation: the timeline only plays the clip, and its duration follows the clip.
 
 ## File map
 
@@ -14,10 +14,12 @@ A screenshot mockup tool. One uploaded image is rendered on a tilted 3D plane wi
 | `camera.ts` | Camera basis from the orientation pose, framing (zoom/offset), focus depth, ray/plane hit test |
 | `gl-renderer.ts` | WebGL2 program: analytic ray/plane cast, disc-gather depth of field, chromatic aberration, grain, edge fade and extend, media rotate/flip |
 | `pipeline.ts` | Toolcraft renderer pipeline registration (`source-decode`, `preview-render`, `export-render`) |
-| `source.ts` | Finding the screenshot asset and decoding it as a retained, source-scoped `ImageBitmap` |
+| `source.ts` | Finding the screenshot or video asset (video wins) and decoding it as a retained, source-scoped `ImageBitmap` or `<video>` |
+| `use-video-playback.ts` | Syncs the decoded `<video>` with timeline play/pause/scrub and sets timeline duration to the clip length |
+| `use-fit-artboard.ts` | Fits the artboard into the canvas area not covered by panels, so the viewport shows exactly what exports |
 | `isomock-canvas.tsx` | Live preview, orbit drag, framing gestures, attribution mount |
 | `use-framing-gestures.ts` | Pinch/Ctrl-scroll zoom and two-finger pan over the screenshot, written to `camera.zoom` and `camera.offset` |
-| `export.ts` | `scene.rasterFrameRenderer`: renders the same shader into a disposable WebGL canvas at artifact size |
+| `export.ts` | `scene.rasterFrameRenderer`: renders the same shader into one reused offscreen WebGL canvas at artifact size; video frames are seeked per export timestamp |
 | `match-background.ts` | Panel actions: "Match screenshot" (median edge color into `appearance.background`) and "Center in frame" (focus point under the frame center), "Reset rotation" (pose back to its default) |
 | `axis-legend.tsx` | X/Y/Z color key beside the runtime gizmo, portaled to `document.body` so it never exports |
 | `attribution.tsx` | Top-left X/GitHub/credit links, portaled to `document.body` so they never export |
@@ -30,7 +32,7 @@ Schema lives in `src/app/app-schema.ts`; ports are wired in `src/app/app-composi
 - Blur radius and grain are expressed relative to output height, so exports at 2K/4K/8K match the preview. Keep new effects resolution-independent the same way.
 - `camera.offset` is in image-height world units, not frame units. The framing math in `use-framing-gestures.ts` depends on `getIsomockFrameScale`.
 - Canvas wheel/pinch over the screenshot is claimed by a window capture listener, because the runtime viewport handles wheel in its own capture phase. Events elsewhere fall through to normal editor navigation.
-- The preview WebGL context must not be lost on dispose (React StrictMode remounts it). Only export renderers pass `disposable: true`.
+- WebGL contexts are never force-lost on dispose (React StrictMode remounts the preview). Export reuses one module-level renderer so 30 FPS video export does not create a context per frame.
 - No code comments. Pass `~/dotfiles/tools/anti-slop/bin/anti-slop` on changed product files before pushing.
 
 ## Checks

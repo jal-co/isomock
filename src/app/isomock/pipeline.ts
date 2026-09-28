@@ -4,13 +4,14 @@ import {
 } from "@/toolcraft/runtime";
 
 import { isomockTargets } from "./settings";
+import type { IsomockDecodedSource } from "./source";
 
 type IsomockPasses = {
   "export-render": ToolcraftRendererPipelinePassContract<void>;
   "preview-render": ToolcraftRendererPipelinePassContract<void>;
   "source-decode": ToolcraftRendererPipelinePassContract<
-    ImageBitmap | null,
-    ImageBitmap,
+    IsomockDecodedSource | null,
+    IsomockDecodedSource,
     readonly [string]
   >;
 };
@@ -46,7 +47,7 @@ export const isomockPipelineRegistration =
       {
         interaction: "media-import",
         invalidates: ["source-decode", "preview-render"],
-        targets: [isomockTargets.source],
+        targets: [isomockTargets.source, isomockTargets.video],
       },
       {
         interaction: "control-drag",
@@ -105,7 +106,7 @@ export const isomockPipelineRegistration =
         sceneBounds: {
           kind: "intrinsic",
           reason:
-            "Decoding keeps the uploaded screenshot's own complete pixel domain.",
+            "Decoding keeps the uploaded screenshot or video's own complete pixel domain.",
         },
       },
       {

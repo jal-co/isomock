@@ -3,7 +3,11 @@ import type { ToolcraftPanelActionHandler } from "@/toolcraft/runtime/react";
 import { createIsomockCamera, getIsomockFrameCenterFocus } from "./camera";
 import { getIsomockDisplayAspect } from "./gl-renderer";
 import { isomockTargets, readIsomockSettings } from "./settings";
-import { findIsomockSource } from "./source";
+import {
+  findIsomockSource,
+  getIsomockSourceTransform,
+  readIsomockSourceFrame,
+} from "./source";
 
 export const matchBackgroundAction = "isomock.match-background";
 export const centerFocusAction = "isomock.center-focus";
@@ -50,10 +54,35 @@ export const handleIsomockPanelAction: ToolcraftPanelActionHandler = async ({
     return;
   }
   const source = findIsomockSource(state.mediaAssets);
+  if (action.value !== centerFocusAction && action.value !== matchBackgroundAction)
+    return;
+  if (!source) {
+    reportFeedback({
+      code: "isomock-no-screenshot",
+      message: "Upload a screenshot or video first.",
+    });
+    return;
+  }
+  const bytes = await resolveMediaResource(source.resourceRef, {
+    signal: new AbortController().signal,
+  });
+  if (!bytes) {
+    reportFeedback({
+      code: "isomock-screenshot-unavailable",
+      message: "The source is unavailable.",
+    });
+    return;
+  }
   if (action.value === centerFocusAction) {
+    const frame =
+      source.assetKind === "image"
+        ? source.sourceSize
+        : await readIsomockSourceFrame(bytes, source.mimeType);
+    const aspect = getIsomockDisplayAspect(frame, getIsomockSourceTransform(source));
+    if (frame instanceof ImageBitmap) frame.close();
     const camera = createIsomockCamera(
       readIsomockSettings(state.values),
-      source ? getIsomockDisplayAspect(source.sourceSize, source.transform) : 1,
+      aspect,
       state.canvas.size.width / state.canvas.size.height,
     );
     dispatch({
@@ -64,25 +93,7 @@ export const handleIsomockPanelAction: ToolcraftPanelActionHandler = async ({
     });
     return;
   }
-  if (action.value !== matchBackgroundAction) return;
-  if (!source) {
-    reportFeedback({
-      code: "isomock-no-screenshot",
-      message: "Upload a screenshot first.",
-    });
-    return;
-  }
-  const bytes = await resolveMediaResource(source.resourceRef, {
-    signal: new AbortController().signal,
-  });
-  if (!bytes) {
-    reportFeedback({
-      code: "isomock-screenshot-unavailable",
-      message: "The screenshot is unavailable.",
-    });
-    return;
-  }
-  const bitmap = await createImageBitmap(new Blob([new Uint8Array(bytes)]), {
+  const bitmap = await readIsomockSourceFrame(bytes, source.mimeType, {
     resizeHeight: sampleEdge,
     resizeQuality: "medium",
     resizeWidth: sampleEdge,
@@ -90,7 +101,7 @@ export const handleIsomockPanelAction: ToolcraftPanelActionHandler = async ({
   const canvas = new OffscreenCanvas(sampleEdge, sampleEdge);
   const context = canvas.getContext("2d");
   if (!context)
-    throw new Error("Isomock could not read the screenshot colors.");
+    throw new Error("Isomock could not read the source colors.");
   context.drawImage(bitmap, 0, 0);
   bitmap.close();
   dispatch({

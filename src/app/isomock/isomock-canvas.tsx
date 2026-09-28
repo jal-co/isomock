@@ -20,23 +20,33 @@ import {
 } from "./gl-renderer";
 import { previewRenderPass, sourceDecodePass } from "./pipeline";
 import { finiteOr, readIsomockSettings, isomockTargets } from "./settings";
-import { decodeIsomockSource, findIsomockSource } from "./source";
+import {
+  decodeIsomockSource,
+  findIsomockSource,
+  getIsomockSourceTransform,
+  getIsomockTextureSource,
+} from "./source";
+import { useIsomockFitArtboard } from "./use-fit-artboard";
 import { useIsomockFramingGestures } from "./use-framing-gestures";
+import { useIsomockVideoPlayback } from "./use-video-playback";
 import styles from "./isomock-canvas.module.css";
 
 export function IsomockCanvas(): React.JSX.Element {
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const rendererRef = React.useRef<IsomockGlRenderer | null>(null);
+  const drawRef = React.useRef<(() => void) | null>(null);
+  const drawFrameRef = React.useRef(0);
   const [renderCount, setRenderCount] = React.useState(0);
   const sceneFrame = useToolcraftProductSceneFrame();
   const pipeline = useToolcraftPipeline();
-  const values = useToolcraftEvaluatedValues();
+  const values = useToolcraftEvaluatedValues(0);
   const renderScale = Math.min(
     2,
     Math.max(1, finiteOr(Number(useToolcraftValue("canvas.renderScale")), 2)),
   );
   const mediaAssets = useToolcraftSelector((state) => state.mediaAssets);
   const source = findIsomockSource(mediaAssets);
+  const transform = getIsomockSourceTransform(source);
   const sourceAssets = React.useMemo(() => (source ? [source] : []), [source]);
   const latestUrl = useToolcraftMediaPresentationUrls(sourceAssets).get(
     source?.id ?? "",
@@ -62,10 +72,15 @@ export function IsomockCanvas(): React.JSX.Element {
     },
     (context) =>
       source && presentationUrl
-        ? decodeIsomockSource(context, source.resourceRef, presentationUrl)
+        ? decodeIsomockSource(context, source, presentationUrl)
         : null,
   );
-  const bitmap = decoded.status === "success" ? decoded.result : null;
+  const decodedSource = decoded.status === "success" ? decoded.result : null;
+  const videoFrame = useIsomockVideoPlayback(decodedSource);
+  const textureSource = React.useMemo(
+    () => (decodedSource ? getIsomockTextureSource(decodedSource) : null),
+    [decodedSource],
+  );
 
   const rect = sceneFrame.kind === "ready" ? sceneFrame.rect : null;
   const devicePixelRatio =
@@ -76,8 +91,8 @@ export function IsomockCanvas(): React.JSX.Element {
   const backingHeight = rect
     ? Math.ceil(rect.height * devicePixelRatio * renderScale)
     : 0;
-  const imageAspect = bitmap
-    ? getIsomockDisplayAspect(bitmap, source?.transform)
+  const imageAspect = textureSource
+    ? getIsomockDisplayAspect(textureSource, transform)
     : 1;
   const camera = React.useMemo(
     () =>
@@ -90,10 +105,11 @@ export function IsomockCanvas(): React.JSX.Element {
   React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return undefined;
-    rendererRef.current = createIsomockGlRenderer(canvas, {
-      disposable: false,
-    });
+    rendererRef.current = createIsomockGlRenderer(canvas);
     return () => {
+      cancelAnimationFrame(drawFrameRef.current);
+      drawFrameRef.current = 0;
+      drawRef.current = null;
       rendererRef.current?.dispose();
       rendererRef.current = null;
     };
@@ -101,68 +117,67 @@ export function IsomockCanvas(): React.JSX.Element {
 
   React.useEffect(() => {
     const renderer = rendererRef.current;
-    if (!renderer || !camera || backingWidth === 0 || backingHeight === 0)
-      return undefined;
-    let cancelled = false;
-    const frame = requestAnimationFrame(() => {
-      const draw = () => {
-        if (cancelled) return;
-        if (bitmap) {
-          renderer.render({
-            camera,
-            height: backingHeight,
-            settings,
-            source: bitmap,
-            transform: source?.transform,
-            width: backingWidth,
-          });
-        } else {
-          renderer.clear(backingWidth, backingHeight);
-        }
-      };
+    if (!renderer || !camera || backingWidth === 0 || backingHeight === 0) {
+      drawRef.current = null;
+      return;
+    }
+    drawRef.current = () => {
+      if (textureSource) {
+        renderer.render({
+          camera,
+          height: backingHeight,
+          settings,
+          source: textureSource,
+          transform,
+          width: backingWidth,
+        });
+      } else {
+        renderer.clear(backingWidth, backingHeight);
+      }
+    };
+    if (drawFrameRef.current) return;
+    drawFrameRef.current = requestAnimationFrame(() => {
+      drawFrameRef.current = 0;
+      const draw = () => drawRef.current?.();
       const work = pipeline
         ? pipeline.runPass(previewRenderPass, undefined, draw)
         : Promise.resolve(draw());
-      void work.then(() => {
-        if (!cancelled) setRenderCount((count) => count + 1);
-      });
+      void work.then(() => setRenderCount((count) => count + 1));
     });
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(frame);
-    };
   }, [
     backingHeight,
     backingWidth,
-    bitmap,
     camera,
     pipeline,
     settings,
-    source?.transform,
+    textureSource,
+    transform,
+    videoFrame,
   ]);
 
+  useIsomockFitArtboard(canvasRef);
   useIsomockFramingGestures(
     canvasRef,
     React.useMemo(
       () => ({ offset: settings.offset, zoom: settings.zoom }),
       [settings.offset, settings.zoom],
     ),
-    bitmap ? imageAspect : null,
+    textureSource ? imageAspect : null,
   );
 
   const hitTest = React.useCallback(
     (clientX: number, clientY: number) => {
       const canvas = canvasRef.current;
-      if (!canvas || !camera || !bitmap) return false;
+      if (!canvas || !camera || !textureSource) return false;
       const bounds = canvas.getBoundingClientRect();
       const ndcX = ((clientX - bounds.left) / bounds.width) * 2 - 1;
       const ndcY = 1 - ((clientY - bounds.top) / bounds.height) * 2;
       return isomockRayHitsImage(camera, ndcX, ndcY);
     },
-    [bitmap, camera],
+    [camera, textureSource],
   );
   const orbit = useToolcraftModelOrbitInteraction<HTMLCanvasElement>({
-    enabled: !!bitmap,
+    enabled: !!textureSource,
     hitTest,
     target: isomockTargets.pose,
   });
@@ -175,7 +190,7 @@ export function IsomockCanvas(): React.JSX.Element {
         {...orbit}
         className={styles.canvas}
         data-isomock-render-count={renderCount}
-        data-isomock-source={bitmap ? "ready" : "empty"}
+        data-isomock-source={decodedSource ? "ready" : "empty"}
         data-toolcraft-product-output=""
         ref={canvasRef}
       />

@@ -4,10 +4,35 @@ import { createIsomockCamera } from "./camera";
 import {
   createIsomockGlRenderer,
   getIsomockDisplayAspect,
+  type IsomockGlRenderer,
 } from "./gl-renderer";
 import { exportRenderPass, sourceDecodePass } from "./pipeline";
 import { readIsomockSettings } from "./settings";
-import { decodeIsomockSource, findIsomockSource } from "./source";
+import {
+  decodeIsomockSource,
+  findIsomockSource,
+  getIsomockSourceTransform,
+  getIsomockTextureSource,
+  loadIsomockVideo,
+  seekIsomockVideo,
+} from "./source";
+
+let exportRenderer: IsomockGlRenderer | null = null;
+const getExportRenderer = () => {
+  exportRenderer ??= createIsomockGlRenderer(new OffscreenCanvas(1, 1));
+  return exportRenderer;
+};
+
+const jobVideos = new WeakMap<AbortSignal, Promise<HTMLVideoElement>>();
+
+function getJobVideo(signal: AbortSignal, url: string) {
+  let video = jobVideos.get(signal);
+  if (!video) {
+    video = loadIsomockVideo(url);
+    jobVideos.set(signal, video);
+  }
+  return video;
+}
 
 export const isomockExportRenderer: ToolcraftProductExportRenderer = {
   baseFileName: "isomock",
@@ -18,45 +43,58 @@ export const isomockExportRenderer: ToolcraftProductExportRenderer = {
     rendererPipeline,
     signal,
     state,
+    timeSeconds,
   }) {
-    const source = findIsomockSource(state.mediaAssets);
-    if (!source) return;
+    const asset = findIsomockSource(state.mediaAssets);
+    if (!asset) return;
     if (!rendererPipeline)
       throw new Error("Isomock export requires its renderer pipeline.");
-    const bitmap = await rendererPipeline.runPass(
+    const decoded = await rendererPipeline.runPass(
       sourceDecodePass,
       {
         "source.presentationUrl": null,
-        "source.resourceRef": source.resourceRef,
+        "source.resourceRef": asset.resourceRef,
       },
-      (passContext) =>
-        decodeIsomockSource(passContext, source.resourceRef, undefined),
+      (passContext) => decodeIsomockSource(passContext, asset, undefined),
     );
     signal.throwIfAborted();
-    if (!bitmap) return;
+    if (!decoded) return;
 
+    let video: HTMLVideoElement | null = null;
+    if (decoded.kind === "video") {
+      video = await getJobVideo(signal, decoded.url);
+      await seekIsomockVideo(video, timeSeconds % decoded.duration);
+      signal.throwIfAborted();
+    }
+    const source = getIsomockTextureSource(decoded, video);
+    const transform = getIsomockSourceTransform(asset);
     const width = Math.max(1, Math.round(frame.width * pixelRatio));
     const height = Math.max(1, Math.round(frame.height * pixelRatio));
     await rendererPipeline.runPass(exportRenderPass, undefined, () => {
-      const canvas = new OffscreenCanvas(width, height);
-      const renderer = createIsomockGlRenderer(canvas, { disposable: true });
+      const renderer = getExportRenderer();
       try {
         const settings = readIsomockSettings(state.values);
         renderer.render({
           camera: createIsomockCamera(
             settings,
-            getIsomockDisplayAspect(bitmap, source.transform),
+            getIsomockDisplayAspect(source, transform),
             frame.width / frame.height,
           ),
           height,
           settings,
-          source: bitmap,
-          transform: source.transform,
+          source,
+          transform,
           width,
         });
-        context.drawImage(canvas, frame.x, frame.y, frame.width, frame.height);
+        context.drawImage(
+          renderer.canvas,
+          frame.x,
+          frame.y,
+          frame.width,
+          frame.height,
+        );
       } finally {
-        renderer.dispose();
+        renderer.clear(1, 1);
       }
     });
   },

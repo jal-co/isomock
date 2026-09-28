@@ -3,6 +3,8 @@ import {
   imageExportModule,
   mediaSourceModule,
   spatialViewModule,
+  timelineModule,
+  videoExportModule,
 } from "@/toolcraft/runtime";
 
 import appDefaults from "./app-defaults.json" with { type: "json" };
@@ -37,15 +39,27 @@ export const appSchema = defineToolcraft({
                 applicability: always,
                 assetKind: "image",
                 defaultValue: null,
-                label: false,
+                label: "Screenshot",
                 performanceReason: "Replacing the screenshot decodes a new source texture once.",
                 performanceRole: "responsiveness",
                 target: isomockTargets.source,
                 type: "fileDrop",
               },
+              video: {
+                accept: "video/*",
+                applicability: always,
+                assetKind: "file",
+                defaultValue: null,
+                description: "Plays on the tilted plane instead of the screenshot. Export it with the video button; clips over 60 seconds are cut.",
+                label: "Video",
+                performanceReason: "Each video frame is uploaded as a texture and re-rendered.",
+                performanceRole: "responsiveness",
+                target: isomockTargets.video,
+                type: "fileDrop",
+              },
             },
             id: "screenshot",
-            title: "Screenshot",
+            title: "Source",
           },
           {
             controls: {
@@ -267,5 +281,11 @@ export const appSchema = defineToolcraft({
       zoom: true,
     },
   },
-  modules: [mediaSourceModule(), spatialViewModule(), imageExportModule()],
+  modules: [
+    mediaSourceModule(),
+    spatialViewModule(),
+    timelineModule({ mode: "playback" }),
+    imageExportModule(),
+    videoExportModule(),
+  ],
 });
