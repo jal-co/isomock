@@ -4,9 +4,10 @@ import {
   useToolcraftSelector,
 } from "@/toolcraft/runtime/react";
 
-const margin = 32;
+const margin = 24;
 const minZoom = 25;
 const maxZoom = 100;
+const panelSettleMs = 300;
 
 type Box = { bottom: number; left: number; right: number; top: number };
 
@@ -60,30 +61,49 @@ export function getIsomockFitViewport(
   };
 }
 
-export function useIsomockFitArtboard(
-  canvasRef: React.RefObject<HTMLCanvasElement | null>,
-): void {
+export function useIsomockFitArtboard(viewport: HTMLElement | null): void {
   const dispatch = useToolcraftDispatch();
   const width = useToolcraftSelector((state) => state.canvas.size.width);
   const height = useToolcraftSelector((state) => state.canvas.size.height);
+  const panelLayout = useToolcraftSelector((state) =>
+    Object.entries(state.panels)
+      .map(([id, panel]) =>
+        [id, panel.offset.x, panel.offset.y, panel.collapsed, panel.hidden, panel.extended, panel.snapEdge].join(":"),
+      )
+      .join("|"),
+  );
+
+  const fit = React.useCallback(() => {
+    if (!viewport) return;
+    const bounds = viewport.getBoundingClientRect();
+    const panelBoxes = Array.from(
+      document.querySelectorAll("[data-panel-id]"),
+      (panel) => panel.getBoundingClientRect(),
+    );
+    const { offset, zoom } = getIsomockFitViewport(
+      bounds,
+      getIsomockFreeArea(bounds, panelBoxes),
+      { height, width },
+    );
+    dispatch({ offset, type: "canvas.setViewport", zoom });
+  }, [dispatch, height, viewport, width]);
 
   React.useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      const viewport = canvasRef.current
-        ?.closest('[data-slot="toolcraft-runtime-canvas"]')
-        ?.getBoundingClientRect();
-      if (!viewport) return;
-      const panels = Array.from(
-        document.querySelectorAll("[data-panel-id]"),
-        (panel) => panel.getBoundingClientRect(),
-      );
-      const { offset, zoom } = getIsomockFitViewport(
-        viewport,
-        getIsomockFreeArea(viewport, panels),
-        { height, width },
-      );
-      dispatch({ offset, type: "canvas.setViewport", zoom });
+    if (!viewport) return undefined;
+    let frame = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(fit);
     });
-    return () => cancelAnimationFrame(frame);
-  }, [canvasRef, dispatch, height, width]);
+    observer.observe(viewport);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [fit, viewport]);
+
+  React.useEffect(() => {
+    const timeout = setTimeout(fit, panelSettleMs);
+    return () => clearTimeout(timeout);
+  }, [fit, panelLayout]);
 }

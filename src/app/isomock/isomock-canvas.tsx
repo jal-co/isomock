@@ -12,6 +12,7 @@ import {
 
 import { IsomockAttribution } from "./attribution";
 import { IsomockAxisLegend } from "./axis-legend";
+import { IsomockExportFrame } from "./export-frame";
 import { createIsomockCamera, isomockRayHitsImage } from "./camera";
 import {
   createIsomockGlRenderer,
@@ -155,7 +156,15 @@ export function IsomockCanvas(): React.JSX.Element {
     videoFrame,
   ]);
 
-  useIsomockFitArtboard(canvasRef);
+  const [viewport, setViewport] = React.useState<HTMLElement | null>(null);
+  React.useEffect(() => {
+    setViewport(
+      canvasRef.current?.closest<HTMLElement>(
+        '[data-slot="toolcraft-runtime-canvas"]',
+      ) ?? null,
+    );
+  }, []);
+  useIsomockFitArtboard(viewport);
   useIsomockFramingGestures(
     canvasRef,
     React.useMemo(
@@ -186,6 +195,7 @@ export function IsomockCanvas(): React.JSX.Element {
     <>
       <IsomockAttribution />
       <IsomockAxisLegend />
+      <IsomockExportFrame viewport={viewport} />
       <canvas
         {...orbit}
         className={styles.canvas}
