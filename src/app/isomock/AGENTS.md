@@ -52,7 +52,7 @@ npm run build
 
 Visual checks use the project's headless Playwright: upload a screenshot through the `fileDrop` input, wait for `[data-isomock-source="ready"]`, then screenshot the canvas or click Export PNG and decode the download.
 
-Toolcraft's `npm run verify:delivery` does not pass yet. The product acceptance matrix, performance scenarios, and worklog have not been authored.
+Do not run `npm run test` or `npm run verify:delivery`. They check Toolcraft's product acceptance matrix and template internals, which Isomock does not maintain. Typecheck, build, focused Vitest files under `src/app/isomock`, and a browser check are the bar.
 
 ## Deploy
 
