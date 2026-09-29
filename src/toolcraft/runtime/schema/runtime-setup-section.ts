@@ -281,6 +281,14 @@ function createRuntimeSetupBackgroundControls({
           }
         : {}),
       ...(workspaceBackground ? { workspaceBackground } : {}),
+      ...(background?.actions
+        ? {
+            backgroundActions: {
+              ...background.actions,
+              applicability: alwaysApplicable,
+            },
+          }
+        : {}),
     },
     layoutGroups: [
       ...(includeBackgroundControl && infinityCanvasControl

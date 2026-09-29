@@ -18,8 +18,22 @@ export type ToolcraftProductExportFrameRenderer = (
   context: ToolcraftProductExportFrameContext,
 ) => PromiseLike<void> | void;
 
+export type ToolcraftProductExportArtifactKind = "image" | "video";
+
+export type ToolcraftProductExportBaseFileName =
+  | string
+  | ((artifact: ToolcraftProductExportArtifactKind) => string);
+
+export function resolveToolcraftProductExportBaseFileName(
+  baseFileName: ToolcraftProductExportBaseFileName | undefined,
+  artifact: ToolcraftProductExportArtifactKind,
+): string {
+  if (baseFileName === undefined) return "toolcraft-export";
+  return typeof baseFileName === "string" ? baseFileName : baseFileName(artifact);
+}
+
 export type ToolcraftProductExportRenderer = Readonly<{
-  baseFileName: string;
+  baseFileName: ToolcraftProductExportBaseFileName;
   getContentBounds?: ToolcraftProductExportBoundsProvider;
   renderFrame: ToolcraftProductExportFrameRenderer;
 }>;

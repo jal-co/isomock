@@ -34,27 +34,16 @@ export const appSchema = defineToolcraft({
         sections: [
           {
             controls: {
-              screenshot: {
-                accept: "image/*",
-                applicability: always,
-                assetKind: "image",
-                defaultValue: null,
-                label: "Screenshot",
-                performanceReason: "Replacing the screenshot decodes a new source texture once.",
-                performanceRole: "responsiveness",
-                target: isomockTargets.source,
-                type: "fileDrop",
-              },
-              video: {
-                accept: "video/*",
+              source: {
+                accept: "image/*,video/*",
                 applicability: always,
                 assetKind: "file",
                 defaultValue: null,
-                description: "Plays on the tilted plane instead of the screenshot. Export it with the video button; clips over 60 seconds are cut.",
-                label: "Video",
-                performanceReason: "Each video frame is uploaded as a texture and re-rendered.",
+                description: "A screenshot or a video. Videos play on the tilted plane and export with the video button; clips over 60 seconds are cut.",
+                label: false,
+                performanceReason: "Replacing the source decodes a new texture; each video frame is uploaded and re-rendered.",
                 performanceRole: "responsiveness",
-                target: isomockTargets.video,
+                target: isomockTargets.source,
                 type: "fileDrop",
               },
             },
@@ -259,7 +248,7 @@ export const appSchema = defineToolcraft({
               matchBackground: {
                 actions: [{ label: "Match screenshot", value: matchBackgroundAction }],
                 applicability: always,
-                label: "Background color",
+                label: false,
                 target: "actions.matchBackground",
                 type: "actions",
               },

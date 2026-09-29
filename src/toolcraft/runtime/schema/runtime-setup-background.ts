@@ -9,13 +9,15 @@ export const toolcraftOutputBackgroundToggleTarget = "export.includeBackground";
 const outputBackgroundTargetPattern = /\b(background|backdrop|scene|canvas)\b/i;
 
 export type ToolcraftRuntimeSetupBackgroundControls = Readonly<{
+  actions?: ToolcraftControlSchema;
   color: ToolcraftControlSchema;
   include: ToolcraftControlSchema;
 }>;
 
 type BackgroundSource<Control> = Readonly<{
+  actionsControlId?: string;
   colorControlId: string;
-  controls: Readonly<{ color: Control; include: Control }>;
+  controls: Readonly<{ actions?: Control; color: Control; include: Control }>;
   includeControlId: string;
   sectionIndex: number;
 }>;
@@ -73,10 +75,22 @@ function findBackgroundSource<
     const colorEntry = colorEntries[0];
     if (!colorEntry) continue;
     const [colorControlId, color] = colorEntry;
+    const actionsEntries = entries.filter(
+      ([, control]) => control.type === "actions",
+    );
+    const actionsEntry =
+      section.id !== "runtime.setup" && actionsEntries.length === 1
+        ? actionsEntries[0]
+        : undefined;
 
     return {
+      ...(actionsEntry ? { actionsControlId: actionsEntry[0] } : {}),
       colorControlId,
-      controls: { color, include },
+      controls: {
+        ...(actionsEntry ? { actions: actionsEntry[1] } : {}),
+        color,
+        include,
+      },
       includeControlId,
       sectionIndex,
     };
@@ -146,6 +160,7 @@ export function extractToolcraftRuntimeSetupBackground({
   const removedControlIds = new Set([
     source.includeControlId,
     source.colorControlId,
+    ...(source.actionsControlId ? [source.actionsControlId] : []),
   ]);
   const nextSections = sections.flatMap((section, sectionIndex) => {
     if (sectionIndex !== source.sectionIndex) {

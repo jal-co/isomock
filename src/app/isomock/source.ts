@@ -25,23 +25,15 @@ export type IsomockDecodedSource =
       url: string;
     }>;
 
-const isReady = (asset: ToolcraftMediaAsset, target: string) =>
-  asset.sourceTarget === target &&
-  asset.assetKind !== "model" &&
-  asset.lifecycle !== "unavailable";
-
 export function findIsomockSource(
   mediaAssets: readonly ToolcraftMediaAsset[],
 ): IsomockSourceAsset | null {
-  const video = mediaAssets.find(
-    (asset): asset is ToolcraftFileAsset =>
-      asset.assetKind === "file" && isReady(asset, isomockTargets.video),
-  );
-  if (video) return video;
   return (
     mediaAssets.find(
-      (asset): asset is ToolcraftImageAsset =>
-        asset.assetKind === "image" && isReady(asset, isomockTargets.source),
+      (asset): asset is IsomockSourceAsset =>
+        asset.sourceTarget === isomockTargets.source &&
+        asset.assetKind !== "model" &&
+        asset.lifecycle !== "unavailable",
     ) ?? null
   );
 }

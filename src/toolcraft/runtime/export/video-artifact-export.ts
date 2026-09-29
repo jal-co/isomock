@@ -1,3 +1,4 @@
+import { resolveToolcraftProductExportBaseFileName } from "./product-export-renderer";
 import { getToolcraftRuntimeBackgroundColor } from "../state/canvas-background-state";
 import {
   downloadToolcraftArtifact,
@@ -135,7 +136,10 @@ export async function exportToolcraftVideoArtifact(
     (request.downloadArtifact ?? downloadToolcraftArtifact)({
       blob,
       extension: backend.extension,
-      rawBaseFileName: request.exportRenderer?.baseFileName ?? "toolcraft-export",
+      rawBaseFileName: resolveToolcraftProductExportBaseFileName(
+        request.exportRenderer?.baseFileName,
+        "video",
+      ),
     });
     request.reportProgress(1);
 

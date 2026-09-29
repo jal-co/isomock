@@ -1,3 +1,4 @@
+import { resolveToolcraftProductExportBaseFileName } from "./product-export-renderer";
 import {
   getToolcraftRuntimeBackgroundColor,
   isToolcraftRuntimeBackgroundEnabled,
@@ -135,8 +136,10 @@ export async function exportToolcraftImageArtifact(
     (request.downloadArtifact ?? downloadToolcraftArtifact)({
       blob,
       extension,
-      rawBaseFileName:
-        request.exportRenderer?.baseFileName ?? "toolcraft-export",
+      rawBaseFileName: resolveToolcraftProductExportBaseFileName(
+        request.exportRenderer?.baseFileName,
+        "image",
+      ),
     });
     request.reportProgress(1);
 

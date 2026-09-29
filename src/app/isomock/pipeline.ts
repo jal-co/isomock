@@ -47,7 +47,7 @@ export const isomockPipelineRegistration =
       {
         interaction: "media-import",
         invalidates: ["source-decode", "preview-render"],
-        targets: [isomockTargets.source, isomockTargets.video],
+        targets: [isomockTargets.source],
       },
       {
         interaction: "control-drag",

@@ -1,10 +1,19 @@
 # Isomock
 
-Product notes for agents editing Isomock. The root `AGENTS.md` is the signed Toolcraft contract and still applies; do not edit it or anything under `src/toolcraft`, `docs/toolcraft` (except `agent-worklog.md`), `LICENSE.md`, or `NOTICE.md`. The integrity check in `npm run test` fails if you do.
+Product notes for agents editing Isomock. The root `AGENTS.md` is the signed Toolcraft contract and still applies; do not edit `docs/toolcraft` (except `agent-worklog.md`), `LICENSE.md`, or `NOTICE.md`.
+
+## Local Toolcraft runtime patches
+
+Justin approved two edits to `src/toolcraft`. Regenerating the runtime drops them, so re-apply them after any Toolcraft update:
+
+- `schema/runtime-setup-background.ts` and `runtime-setup-section.ts`: one `actions` control in the authored Background section moves into Settings below Background color. This is how Match screenshot lives there.
+- `export/product-export-renderer.ts`, `image-artifact-export.ts`, `video-artifact-export.ts`, `export-renderer-coverage.ts`: a raster `baseFileName` may be a function of `"image" | "video"`, resolved at download time. Exports are named `isomock-<kind>-mmddyy-hhmmss`.
+
+The integrity check in `npm run test` already failed on product code before these patches; they add signed-file mismatches on top.
 
 ## What it is
 
-A screenshot mockup tool. One uploaded image or video is rendered on a tilted 3D plane with depth-of-field blur, grain, and an edge fade, then exported as PNG/JPG or MP4/WebM. Video has no product animation: the timeline only plays the clip, and its duration follows the clip.
+A screenshot mockup tool. One uploaded image or video (a single `fileDrop` with `assetKind: "file"`) is rendered on a tilted 3D plane with depth-of-field blur, grain, and an edge fade, then exported as PNG/JPG or MP4/WebM. Video has no product animation: the timeline only plays the clip, and its duration follows the clip.
 
 ## File map
 
@@ -14,13 +23,13 @@ A screenshot mockup tool. One uploaded image or video is rendered on a tilted 3D
 | `camera.ts` | Camera basis from the orientation pose, framing (zoom/offset), focus depth, ray/plane hit test |
 | `gl-renderer.ts` | WebGL2 program: analytic ray/plane cast, disc-gather depth of field, chromatic aberration, grain, edge fade and extend, media rotate/flip |
 | `pipeline.ts` | Toolcraft renderer pipeline registration (`source-decode`, `preview-render`, `export-render`) |
-| `source.ts` | Finding the screenshot or video asset (video wins) and decoding it as a retained, source-scoped `ImageBitmap` or `<video>` |
+| `source.ts` | Finding the source asset and decoding it as a retained, source-scoped `ImageBitmap` or `<video>` |
 | `use-video-playback.ts` | Syncs the decoded `<video>` with timeline play/pause/scrub and sets timeline duration to the clip length |
 | `use-fit-artboard.ts` | Fits the artboard into the canvas area not covered by panels, on load, canvas resize, window resize, and panel move/collapse |
 | `export-frame.tsx` | Dims the workspace outside the artboard and draws a hairline edge, portaled into the runtime canvas viewport so it never exports |
 | `isomock-canvas.tsx` | Live preview, orbit drag, framing gestures, attribution mount |
 | `use-framing-gestures.ts` | Pinch/Ctrl-scroll zoom and two-finger pan over the screenshot, written to `camera.zoom` and `camera.offset` |
-| `export.ts` | `scene.rasterFrameRenderer`: renders the same shader into one reused offscreen WebGL canvas at artifact size; video frames are seeked per export timestamp |
+| `export.ts` | `scene.rasterFrameRenderer` and the timestamped export file name: renders the same shader into one reused offscreen WebGL canvas at artifact size; video frames are seeked per export timestamp |
 | `match-background.ts` | Panel actions: "Match screenshot" (median edge color into `appearance.background`) and "Center in frame" (focus point under the frame center), "Reset rotation" (pose back to its default) |
 | `axis-legend.tsx` | X/Y/Z color key beside the runtime gizmo, portaled to `document.body` so it never exports |
 | `attribution.tsx` | Top-left X/GitHub/credit links, portaled to `document.body` so they never export |

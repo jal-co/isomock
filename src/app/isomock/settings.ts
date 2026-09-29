@@ -17,8 +17,7 @@ export const isomockTargets = {
   offset: "camera.offset",
   pose: "camera.pose",
   sharpBand: "focus.sharpBand",
-  source: "source.screenshot",
-  video: "source.video",
+  source: "source.media",
   zoom: "camera.zoom",
 } as const;
 

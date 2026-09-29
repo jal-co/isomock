@@ -34,8 +34,19 @@ function getJobVideo(signal: AbortSignal, url: string) {
   return video;
 }
 
+const twoDigits = (value: number) => String(value).padStart(2, "0");
+
+export function getIsomockExportFileName(
+  artifact: "image" | "video",
+  now = new Date(),
+): string {
+  const date = [now.getMonth() + 1, now.getDate(), now.getFullYear() % 100];
+  const time = [now.getHours(), now.getMinutes(), now.getSeconds()];
+  return `isomock-${artifact}-${date.map(twoDigits).join("")}-${time.map(twoDigits).join("")}`;
+}
+
 export const isomockExportRenderer: ToolcraftProductExportRenderer = {
-  baseFileName: "isomock",
+  baseFileName: (artifact) => getIsomockExportFileName(artifact),
   async renderFrame({
     context,
     frame,

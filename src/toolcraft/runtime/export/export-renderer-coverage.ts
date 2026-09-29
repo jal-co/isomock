@@ -35,7 +35,11 @@ export function getToolcraftExportRendererCoverageErrors({
       "exportRenderer requires a typed image or video export action.",
     );
   }
-  if (exportRenderer && exportRenderer.baseFileName.trim().length === 0) {
+  if (
+    exportRenderer &&
+    typeof exportRenderer.baseFileName === "string" &&
+    exportRenderer.baseFileName.trim().length === 0
+  ) {
     errors.push("exportRenderer.baseFileName must not be blank.");
   }
 
