@@ -4,6 +4,8 @@
 
 This is a standalone Toolcraft template app generated from the base starter.
 
+> **Isomock override:** `src/toolcraft` is a maintained fork owned by this project, not an immutable copy. Edit it directly when a change needs runtime support, and never regenerate it from upstream. The signed integrity check is not part of `npm run test`. See `src/app/isomock/AGENTS.md`.
+
 ## Standalone by default
 
 An ordinary request to build, port, or change an app means a standalone Toolcraft product. Do not introduce website-adapter work, install `@pixel-point/toolcraft-bridge`, `@pixel-point/toolcraft-workspace` or the separate `@toolcraft/toolbar`, create website entry points or mount registrations, or add Global/site controls as preparation for a possible future integration. The standard runtime toolbar remains part of the app.

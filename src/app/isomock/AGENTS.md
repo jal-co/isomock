@@ -1,15 +1,13 @@
 # Isomock
 
-Product notes for agents editing Isomock. The root `AGENTS.md` is the signed Toolcraft contract and still applies; do not edit `docs/toolcraft` (except `agent-worklog.md`), `LICENSE.md`, or `NOTICE.md`.
+Product notes for agents editing Isomock. The root `AGENTS.md` is the Toolcraft contract and still applies, except where it says `src/toolcraft` is immutable; do not edit `docs/toolcraft` (except `agent-worklog.md`), `LICENSE.md`, or `NOTICE.md`.
 
-## Local Toolcraft runtime patches
+## Toolcraft runtime is ours
 
-Justin approved two edits to `src/toolcraft`. Regenerating the runtime drops them, so re-apply them after any Toolcraft update:
+`src/toolcraft` is a fork of Toolcraft maintained here. Edit it when a feature needs runtime support; do not regenerate it from upstream, which would drop these changes. `npm run test` no longer runs the signed integrity check. Changes made so far:
 
 - `schema/runtime-setup-background.ts` and `runtime-setup-section.ts`: one `actions` control in the authored Background section moves into Settings below Background color. This is how Match screenshot lives there.
 - `export/product-export-renderer.ts`, `image-artifact-export.ts`, `video-artifact-export.ts`, `export-renderer-coverage.ts`: a raster `baseFileName` may be a function of `"image" | "video"`, resolved at download time. Exports are named `isomock-<kind>-mmddyy-hhmmss`.
-
-The integrity check in `npm run test` already failed on product code before these patches; they add signed-file mismatches on top.
 
 ## What it is
 

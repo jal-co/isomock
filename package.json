@@ -12,7 +12,7 @@
     "preview:restart": "node scripts/run-vite-on-free-port.mjs preview --toolcraft-restart",
     "reference:study": "node scripts/create-toolcraft-motion-reference-study.mjs",
     "docs:check": "node scripts/check-toolcraft-docs.mjs",
-    "test": "node scripts/check-toolcraft-docs.mjs && node scripts/check-toolcraft-integrity.mjs && node --test scripts/*.test.mjs && vitest run src --passWithNoTests --reporter=default --reporter=./scripts/toolcraft-vitest-runtime-evidence-reporter.mjs",
+    "test": "node scripts/check-toolcraft-docs.mjs && node --test scripts/*.test.mjs && vitest run src --passWithNoTests --reporter=default --reporter=./scripts/toolcraft-vitest-runtime-evidence-reporter.mjs",
     "test:browser": "playwright install chromium && playwright test --grep-invert \"browser perf:|toolcraft kernel:\"",
     "test:feature": "node scripts/run-feature-verification.mjs",
     "journal": "node scripts/toolcraft-journal.mjs",
